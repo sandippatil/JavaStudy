@@ -1,0 +1,954 @@
+https://www.geeksforgeeks.org/java-interview-questions/
+
+JVM consists of a few memory storages as mentioned below:
+
+1. Class(Method) Area: stores class-level data of every class such as the runtime constant pool, field, and method data, and the code for methods.
+2. Heap: Objects are created or objects are stored. It is used to allocate memory to objects during run time.
+3. Stack: stores data and partial results which will be needed while returning value for method and performing dynamic linking
+4. Program Counter Register: stores the address of the Java virtual machine instruction currently being executed.
+5. Native Method Stack: stores all the native methods used in the application.
+
+Can @SpringBootApplication elemenated:
+@SpringBootApplication
+// is equivalent to:
+@Configuration
+@EnableAutoConfiguration
+@ComponentScan
+
+What is a classloader?
+In Java, a ClassLoader is a part of the Java Runtime Environment (JRE) that is responsible for 
+loading classes into memory when they are required during program execution.
+Loads .class files (compiled Java bytecode) into the Java Virtual Machine (JVM).
+
+JVM:
+| Feature       | Description                                                             |
+| ------------- | ----------------------------------------------------------------------- |
+| **Full Form** | Java Virtual Machine                                                    |
+| **Purpose**   | Executes Java **bytecode** (i.e., `.class` files)                       |
+| **Platform**  | Platform-dependent (different JVMs for Windows, Linux, etc.)            |
+| **Key Role**  | Converts bytecode to machine code using **JIT (Just-In-Time) Compiler** |
+| **Includes**  | Memory management, garbage collection, thread handling, etc.            |
+
+JRE:
+| Feature              | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| **Full Form**        | Java Runtime Environment                                |
+| **Purpose**          | Provides everything needed to **run** Java applications |
+| **Includes**         | JVM + Java class libraries + supporting files           |
+| **Does Not Include** | Development tools like `javac` (Java compiler)          |
+
+JDK:
+| Feature       | Description                                              |
+| ------------- | -------------------------------------------------------- |
+| **Full Form** | Java Development Kit                                     |
+| **Purpose**   | Provides everything to **develop and run** Java programs |
+| **Includes**  | JRE + development tools (`javac`, `jar`, debugger, etc.) |
+| **Used by**   | Java developers                                          |
+
+| Component | Contains               | Use Case                     |
+| --------- | ---------------------- | ---------------------------- |
+| **JVM**   | Executes bytecode      | Core engine to run Java apps |
+| **JRE**   | JVM + Libraries        | Run Java apps                |
+| **JDK**   | JRE + Compiler & Tools | Develop Java apps            |
+
+
+String litral vs String object:
+
+| Feature                        | `String s = "abc";`       | `String s = new String("abc");`           |
+| ------------------------------ | ------------------------- | ----------------------------------------- |
+| Memory Location                | String Pool (Heap)        | New object in Heap                        |
+| Reusability                    | Reuses if already in pool | Always creates a new object               |
+| Performance                    | Faster & memory efficient | Slightly slower & uses more memory        |
+| Reference Equality (`==`)      | May be `true`             | Always `false` unless explicitly interned |
+| Content Equality (`.equals()`) | `true`                    | `true`                                    |
+
+Real-life scenario when new String object needed:
+Imagine a custom caching system where you log when new objects are created.
+
+Set<String> cache = new HashSet<>();
+cache.add(new String("item")); // Ensures it's a new object
+cache.add(new String("item")); // Added again due to different reference (unless interned)
+
+Instance Variable: Has a default value 
+Local Variable: No default value
+
+Class Variable(static):
+Rules of static in Java:
+1. Static variables (class variables):
+Shared by all instances of a class.
+Only one copy exists per class.
+
+2. Static methods:
+Can only access static data/methods directly.
+Cannot use this or super keywords (they refer to objects).
+Can be called without creating an object.
+Static methods cannot be overridden in the traditional sense (they can be hidden).
+
+class Parent {
+    static void show() {
+        System.out.println("Parent static method");
+    }
+}
+
+class Child extends Parent {
+    static void show() {
+        System.out.println("Child static method");
+    }
+}
+
+Parent p = new Child();
+p.show();  // Output: Parent static method
+		
+3. Static blocks:
+Used for static initialization.
+Executes once when the class is loaded.
+
+class Abc{
+	static String s;
+	static {
+		s="Sandip";
+		System.out.println("Static block called");
+	}
+	public Abc() {
+		System.out.println("Abc constructor");
+	}
+}
+
+4. Static classes (nested only):
+Only nested classes can be static.
+Cannot access non-static members of outer class directly.
+
+class Car {
+    private String model;
+    private static int wheels = 4;
+
+    public Car(String model) {
+        this.model = model;
+    }
+
+    // Static inner class
+    static class Engine {
+        void info() {
+            // Can't access 'model' (non-static)
+            System.out.println("Engine has " + wheels + " wheels.");
+        }
+    }
+}
+Car.Engine engine = new Car.Engine();
+engine.info();
+
+| Feature                    | Static Inner Class           | Non-static Inner Class            |
+| -------------------------- | ---------------------------- | --------------------------------- |
+| Needs outer class object?  | ❌ No                         | ✅ Yes                             |
+| Access outer class members | Only static members          | All members (even private)        |
+| Memory efficiency          | More efficient (independent) | Less efficient (depends on outer) |
+
+
+Common Use Cases of static:
+Utility/helper methods (Math.random(), Collections.sort())
+Constants (public static final)
+Caching shared resources
+
+| Feature            | `InputStream` / `OutputStream`                 | `Reader` / `Writer`                           |
+| ------------------ | ---------------------------------------------- | --------------------------------------------- |
+| Data Type          | **Binary** (raw bytes)                         | **Character** (text)                          |
+| Use Case           | Reading/writing **files, images, audio, etc.** | Reading/writing **text files** or **Unicode** |
+| Introduced in      | Java 1.0                                       | Java 1.1                                      |
+| Base Classes       | `InputStream`, `OutputStream`                  | `Reader`, `Writer`                            |
+| Buffering Classes  | `BufferedInputStream`, `BufferedOutputStream`  | `BufferedReader`, `BufferedWriter`            |
+| Encoding Awareness | ❌ No                                           | ✅ Yes (handles encodings)                     |
+
+InputStreamReader isr = new InputStreamReader(new FileInputStream("data.txt"), "UTF-8");
+BufferedReader reader = new BufferedReader(isr);
+
+
+Design patterns used in your project:
+1. Builder Pattern -> while accessing files in s3
+2. Singleton Pattern -> While creating Datasource, Services
+3. Observer Pattern -> while sending rest requests from angular
+
+Operators like >> and >>> seem to be the same but act a bit differently. >> operator shifts the sign 
+bits and the >>> operator is used in shifting out the zero-filled bits.
+
+Which Java operator is right associative:
+There is only one operator which is right associative which is = operator.
+
+What is the transient keyword?
+The transient keyword is used at the time of serialization if we don’t want to save the value of a 
+particular variable in a file. When JVM comes across a transient keyword, it ignores the original 
+value of the variable and saves the default value of that variable data type.
+class User implements Serializable {
+    String username;
+    transient String password; // This won't be serialized
+
+    User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+}
+
+User user = new User("john_doe", "secret123");
+// Serialize to file
+ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("user.ser"));
+oos.writeObject(user);
+oos.close();
+
+// Deserialize from file
+ObjectInputStream ois = new ObjectInputStream(new FileInputStream("user.ser"));
+User deserializedUser = (User) ois.readObject();
+ois.close();
+System.out.println("Username: " + deserializedUser.username);  // john_doe
+System.out.println("Password: " + deserializedUser.password);  // null
+
+obj.wait()		
+| Feature             | Description                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Belongs to          | `Object` class (`obj.wait()`)                                                                               |
+| Purpose             | Causes the thread to **wait** until another thread calls `notify()` or `notifyAll()` on the **same object** |
+| Lock behavior       | **Releases the monitor lock**                                                                               |
+| Used for            | Thread communication (Producer–Consumer)                                                                    |
+| Must be called from | Synchronized block or method                                                                                |
+| Throws              | `InterruptedException`                                                                                      |
+
+synchronized(obj) {
+    System.out.println("Waiting...");
+    obj.wait();  // Thread releases the lock here
+    System.out.println("Resumed.");
+}
+
+synchronized(obj) {
+    obj.notify();
+}
+
+wait()
+wait(long timeout)
+wait(long timeout, int nanos)
+
+| Feature     | `String`        | `StringBuffer`          | `StringBuilder`          |
+| ----------- | --------------- | ----------------------- | ------------------------ |
+| Mutable     | ❌ No            | ✅ Yes                   | ✅ Yes                    |
+| Thread-safe | ✅ Yes           | ✅ Yes (synchronized)    | ❌ No                     |
+| Performance | ❌ Slow          | ⚠️ Medium               | ✅ Fastest                |
+| Use Case    | Constants, keys | Multi-threaded text ops | Fast single-threaded ops |
+
+StringBuffer sb = new StringBuffer("Hello");
+sb.append(" World");                  // Hello World
+sb.insert(5, ",");                    // Hello, World
+sb.replace(0, 5, "Hi");               // Hi, World
+sb.delete(3, 5);                      // Hi World
+sb.reverse();                         // dlroW iH
+
+System.out.println(sb.toString());
+		
+
+int[] Arr = new int[5]; 
+int[] arr = {1, 2, 3, 5, 0};
+Arrays in Java are created in heap memory.
+
+Is it possible to make an array volatile?
+In Java, it is not possible to make a volatile. Volatile keywords in Java can only be applied to 
+individual variables but not to arrays or collections. 
+
+The main concepts of OOPs in Java are mentioned below:
+Inheritance
+Polymorphism
+Abstraction
+Encapsulation
+
+newInstance():
+
+| Feature      | Description                                                               |
+| ------------ | ------------------------------------------------------------------------- |
+| Syntax       | `ClassName obj = (ClassName) Class.forName("MyClass").newInstance();`     |
+| Type checked | ❌ Only at **runtime**                                                     |
+| Constructor  | Invokes the **default (no-arg) constructor** via reflection               |
+| Usage        | Used in **frameworks**, **ORMs**, **factories**, **deserialization**      |
+| Flexibility  | ✅ Can create instances when the class name is **not known until runtime** |
+
+
+
+What is default Access Specifiers
+when you don’t specify any access modifier for a class, method, or variable, it uses the default access 
+specifier, also known as package-private access.
+The member is accessible only within the same package.
+Not accessible from classes in other packages — even if they're subclasses.
+
+
+| Access Modifier | Class | Package | Subclass (other package)   | World |
+| --------------- | ----- | ------- | ------------------------   | ----- |
+| `private`       | ✅     | ❌       | ❌                        | ❌     |
+| **default**     | ✅     | ✅       | ❌                        | ❌     |
+| `protected`     | ✅     | ✅       | ✅                        | ❌     |
+| `public`        | ✅     | ✅       | ✅                        | ✅     |
+
+
+Methods to create objects in Java are mentioned below:
+Using new keyword
+Using new instance
+Using clone() method
+Using deserialization
+Using the newInstance() method of the Constructor class
+
+clone():
+clone() is a method in the Object class.
+It creates a copy of the current object and returns it.
+It performs a shallow copy by default (not deep copy).
+*** It's a protected method, so it must be overridden and made public in your class.
+
+class Person implements Cloneable {
+    String name;
+    int age;
+
+    Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }   
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+}
+
+Person p1 = new Person("John", 25);
+Person p2 = (Person) p1.clone();
+System.out.println(p1.name);  // John
+System.out.println(p2.name);  // John
+System.out.println(p1 == p2); // false (different objects)
+		
+Cloneable interface:
+A marker interface (it has no methods).
+If a class does not implement Cloneable, calling clone() on its object throws CloneNotSupportedException.
+It tells the JVM:
+“This class allows cloning.”
+
+Shallow Copy:
+Copies the object and its references.
+Nested objects are not cloned — both original and copy share the same inner objects.
+Made using:
+✅ Object.clone() (default),
+✅ Copy constructors (sometimes),
+❌ Not safe if inner objects are mutable.
+
+
+Deep copy:
+Creates a completely independent copy, including all nested objects.
+Each object in the structure is cloned recursively.
+You must manually implement this or use tools like serialization or libraries like Apache Commons Lang.
+
+class Address {
+    String city;
+    Address(String city) {
+        this.city = city;
+    }
+}
+
+class Person implements Cloneable {
+    String name;
+    Address address;
+
+    Person(String name, Address address) {
+        this.name = name;
+        this.address = address;
+    }
+
+    // 🔹 Shallow copy
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    // 🔸 Deep copy
+    public Person deepClone() {
+        return new Person(this.name, new Address(this.address.city));
+    }
+}
+
+
+
+How to make immutable object:
+Make the class final – so it can't be extended.
+Make all fields private and final – to prevent modification.
+No setters – only getters.
+Initialize all fields via constructor.
+For mutable fields, return a defensive copy instead of original reference.
+
+
+public final class Employee {
+    private final String name;
+    private final int id;
+    private final Date joinDate;  // Mutable field
+
+    public Employee(String name, int id, Date joinDate) {
+        this.name = name;
+        this.id = id;
+        this.joinDate = new Date(joinDate.getTime()); // Defensive copy
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public Date getJoinDate() {
+        return new Date(joinDate.getTime()); // Defensive copy
+    }
+}
+
+private constructor:
+restrict object creation and implement specific design patterns.
+
+
+features of the Interface:
+The interface can help to achieve total abstraction.
+Allows us to use multiple inheritances in Java.
+Any class can implement multiple interfaces even when one class can extend only one class.
+It is also used to achieve loose coupling.
+
+marker interface:
+empty interface (no field or methods) it is called a marker interface. 
+Examples of marker interfaces are Serializable, Cloneable, and Remote interfaces. 
+
+Final:
+final with Variables:
+final int x = 10;
+// x = 20; // ❌ Error: cannot assign a value to final variable
+
+final List<String> list = new ArrayList<>();
+list.add("item");   // ✅ allowed
+
+final with Methods: cannot override final method
+final with Classes: can't extend final class
+final with Parameters: Prevents method parameters from being reassigned inside the method.
+
+List.of():
+List.of(...) is a factory method introduced in Java 9 to create immutable lists quickly and concisely.
+List<String> list = List.of("Apple", "Banana", "Cherry");
+
+Creates a fixed-size, read-only list.
+Throws exceptions if you try to modify it.
+
+| Feature          | **Abstract Class**                          | **Interface**                                       |
+| ---------------- | ------------------------------------------- | --------------------------------------------------- |
+| Purpose          | Common base for related classes             | Contract for unrelated classes                      |
+| Inheritance type | Supports **single inheritance**             | Supports **multiple inheritance**                   |
+| Methods          | Can have **abstract + concrete** methods    | From Java 8+, can have **default + static** methods |
+| Variables        | Can have variables with any access modifier | All variables are `public static final` by default  |
+| Constructor      | ✅ Can have constructors                     | ❌ Cannot have constructors                          |
+| Access Modifiers | Can be `public`, `protected`, `private`     | Only `public` and `default` methods                 |
+| Use when…        | You want to share common code               | You want to enforce a contract                      |
+
+
+*** abstract class and interfaces cannot be final in Java.
+
+Aggregation or "has-a" relationship: 
+two classes best described as a "has-a" relationship.  
+It contains the reference to another class and is said to have ownership of that class.
+
+class Teacher {
+    String name;
+    Teacher(String name) {
+        this.name = name;
+    }
+}
+
+class Department {
+    String deptName;
+    Teacher teacher;
+
+    Department(String deptName, Teacher teacher) {
+        this.deptName = deptName;
+        this.teacher = teacher;
+    }
+}
+
+What is the ‘IS-A ‘ relationship in OOPs Java?
+'IS-A' is a type of relationship in OOPs Java where one class inherits another class.
+
+
+Single Inheritance: When a child or subclass extends only one superclass
+Multilevel Inheritance: 
+Hierarchical Inheritance: When multiple subclasses derive from the same parent class 
+Multiple Inheritance: When a child class inherits from multiple parent classes is known as 
+		Multiple Inheritance. In Java, it only supports multiple inheritance of interfaces, not classes.
+
+
+Can we override the overloaded method?
+Yes
+
+Can we change the scope of the overridden method in the subclass?
+Yes, we can change the scope of an overridden method in the subclass, but only to make it wider 
+or the same as the superclass method’s scope.
+
+
+abstract class
+A class declared as abstract, 
+cannot be instantiated i.e., the object cannot be created. 
+It may or may not contain abstract methods but if a class has at least one abstract method, 
+it must be declared abstract.
+abstract class cant be final
+
+abstract class Fruits {
+    abstract void run();
+}
+
+How can you avoid serialization in the child class if the base class is implementing the Serializable interface?
+Serialization in the child class if the base class is implementing the Serializable interface then we can avoid it 
+by defining the writeObject() method and throwing NotSerializableException().
+
+
+Collection framework implements
+1. Collection Interface
+2. List Interface
+3. Set Interface
+4. Queue Interface
+5. Deque Interface
+6. Map Interface
+
+| Feature            | `Collection`                 | `Collections`                                |
+| ------------------ | ---------------------------- | -------------------------------------------- |
+| Type               | Interface                    | Utility Class                                |
+| Belongs to package | `java.util`                  | `java.util`                                  |
+| Used for           | Declaring & storing elements | Performing operations on collections         |
+| Examples           | `List`, `Set`, `Queue`       | `Collections.sort()`, `.reverse()`, `.max()` |
+| Inheritance        | Extended by other interfaces | No inheritance (final class)                 |
+
+How can you synchronize an ArrayList in Java?
+
+3 Common Ways to Synchronize an ArrayList
+
+1. 
+	List<String> list = Collections.synchronizedList(new ArrayList<>());
+	// Thread-safe access example
+	synchronized (list) {
+		list.add("Apple");
+	}
+
+	You must use synchronized(list) when iterating to avoid ConcurrentModificationException.
+
+2. Using CopyOnWriteArrayList -> without needing manual synchronization.
+	List<String> list = new CopyOnWriteArrayList<>();
+	list.add("Banana");
+	
+	✅ Safe to read and write concurrently
+	❌ Not efficient for frequent writes (creates a new copy every time)
+
+3. Manual Synchronization (not recommended unless needed)
+	List<String> list = new ArrayList<>();
+
+	synchronized (list) {
+		list.add("Mango");
+	}
+
+	You have to synchronize manually everywhere, which is error-prone.
+
+Why do we need a synchronized ArrayList when we have Vectors (which are synchronized) in Java?
+ArrayList is faster than Vectors.
+ArrayList supports multithreading whereas Vectors only supports single-thread use.
+ArrayList is safer to use, as Vectors supports single threads and individual operations are less safe and take longer to synchronize.
+Vectors are considered outdated in Java because of their synchronized nature.
+
+| Feature         | `Vector`        | `ArrayList`                                   |
+| --------------- | --------------- | --------------------------------------------- |
+| Thread-safe     | ✅ Yes           | ❌ No                                          |
+| Performance     | ❌ Slower        | ✅ Faster                                      |
+| Synchronization | Built-in        | Manual (use `Collections.synchronizedList()`) |
+| Legacy          | ✅ Yes (Old)     | ❌ No (Preferred)                              |
+| Grow Strategy   | Doubles in size | Grows 50%                                     |
+
+
+how elements are stored in memory for both regular arrays and ArrayLists in Java? 
+
+array in Java are stored in contiguous memory locations, meaning that each element is stored in a 
+sequential block of memory
+
+ArrayList elements are also stored in contiguous memory locations, similar to arrays. 
+However, when an ArrayList reaches its capacity and more elements need to be added, a new, 
+larger underlying array is created. The elements from the old array are then copied to the new one. 
+This process ensures that the ArrayList can grow dynamically while keeping the elements in 
+contiguous memory locations.
+
+
+convert Array to ArrayList:
+List<String> list = Arrays.asList(array);
+
+convert ArrayList to Array:
+String[] array = list.toArray(new String[0]);
+
+How to make Java ArrayList Read-Only
+array_readonly = Collections.unmodifiableList(ArrayList);
+
+priority queue:
+Queue<Integer> pq = new PriorityQueue<>();
+pq.add(30);
+pq.add(10);
+pq.add(20);
+
+while (!pq.isEmpty()) {
+    System.out.println(pq.poll());
+}
+
+output:
+10
+20
+30
+
+PriorityQueue<String> pq = new PriorityQueue<>(Comparator.reverseOrder());
+
+
+LinkedList class:
+LinkedList class is Java that uses a doubly linked list to store elements. 
+It inherits the AbstractList class and implements List and Deque interfaces. 
+1. LinkedList classes are non-synchronized.
+2. Maintains insertion order.
+3. It can be used as a list, stack, or queue.
+
+add(), addFirst(), addLast(), remove(), removeFirst(), removeLast(), get(), getFirst(), getLast(), 
+peek(), peekFirst(), peekLast(), push(), pop(), contains(), indexOf(), lastIndexOf(), 
+size(), isEmpty(), clear()
+
+
+Set:
+don't store duplicate elements.
+don't keep any order of the elements.
+1. HashSet
+2. LinkedHashSet
+3. TreeSet
+
+Map:
+It contains only unique elements.
+It cannot have a NULL key 
+It can have multiple NULL values.
+It is non-synchronized.
+
+TreeMap
+HashMap
+LinkedHashMap
+ConcurrentHashMap -> is a thread-safe
+
+Inserting null objects in ConcurrentHashMap is not possible as a key or as value.
+
+enumeration:
+Enumeration is a user-defined data type. It is mainly used to assign names to integral constants, 
+the names make a program easy to read and maintain.
+enum Color 
+{ 
+    RED, GREEN, BLUE; 
+}
+
+| Feature                      | `ArrayList`                        | `LinkedList`                         |
+| ---------------------------- | ---------------------------------- | ------------------------------------ |
+| Internal Structure           | **Dynamic array**                  | **Doubly linked list**               |
+| Access speed                 | ✅ Fast (O(1)) for **get(index)**   | ❌ Slower (O(n)) for **get(index)**   |
+| Insertion/deletion at end    | ✅ Fast (amortized O(1))            | ✅ Fast (O(1))                        |
+| Insertion/deletion in middle | ❌ Slower (O(n))                    | ✅ Faster (O(1) if using iterator)    |
+| Memory usage                 | ✅ Compact (less overhead)          | ❌ Higher (extra pointers per node)   |
+| Search time                  | ✅ Fast for random access           | ❌ Linear search (O(n))               |
+| Implements                   | `List`                             | `List`, `Deque`, `Queue`             |
+| Use case                     | Best for **read-heavy** operations | Best for **insert/delete-heavy** ops |
+
+
+| Feature         | `Iterator`                             | `ListIterator`                                                                     |
+| --------------- | -------------------------------------- | ---------------------------------------------------------------------------------- |
+| Applicable to   | All `Collection` types (`Set`, `List`) | Only `List` (like `ArrayList`, `LinkedList`)                                       |
+| Direction       | **Forward only**                       | **Both forward and backward**                                                      |
+| Methods         | `hasNext()`, `next()`, `remove()`      | `hasNext()`, `next()`, `hasPrevious()`, `previous()`, `add()`, `set()`, `remove()` |
+| Modify elements | ❌ Cannot replace or add                | ✅ Can add or replace elements                                                      |
+| Index access    | ❌ Not available                        | ✅ Methods like `nextIndex()`, `previousIndex()`                                    |
+| Use case        | Simple iteration                       | Advanced list traversal and modification                                           |
+
+
+| Feature                  | `HashMap`                                     | `Hashtable`                        |
+| ------------------------ | --------------------------------------------- | ---------------------------------- |
+| Thread-safe              | ❌ No                                          | ✅ Yes (all methods synchronized)   |
+| Performance              | ✅ Faster (no sync overhead)                   | ❌ Slower (due to synchronization)  |
+| Allows `null` keys       | ✅ One `null` key allowed                      | ❌ No `null` keys or values allowed |
+| Allows `null` values     | ✅ Yes                                         | ❌ No                               |
+| Legacy                   | ❌ No (introduced in Java 1.2)                 | ✅ Yes (introduced in Java 1.0)     |
+| Iterator                 | Fail-fast                                     | Not fail-fast                      |
+| Preferred in modern apps | ✅ Yes (`ConcurrentHashMap` for thread-safety) | ❌ Avoid in modern apps             |
+
+
+| Feature           | `Comparable`                     | `Comparator`                                 |
+| ----------------- | -------------------------------- | -------------------------------------------- |
+| Package           | `java.lang`                      | `java.util`                                  |
+| Purpose           | Defines **natural ordering**     | Defines **custom ordering**                  |
+| Method            | `compareTo(Object o)`            | `compare(Object o1, Object o2)`              |
+| Modified Class    | Implemented **inside the class** | Implemented **outside the class**            |
+| Affects           | The class’s own default sort     | Allows multiple ways to sort externally      |
+| Sort method usage | Used by `Collections.sort(list)` | Used by `Collections.sort(list, comparator)` |
+| Multiple sorting? | ❌ One natural order only         | ✅ Can define many comparators                |
+
+
+Comparator<Student> nameComparator = (a, b) -> a.name.compareTo(b.name);
+
+Collections.sort(list, nameComparator);
+
+FailFast iterator and FailSafe iterator:
+A FailFast iterator is an iterator that throws a ConcurrentModificationException if it detects that the 
+underlying collection has been modified while the iterator is being used.
+iterator for a HashMap is FailFast.
+
+HashMap<Integer, String> map = new HashMap<>();
+map.put(1, "one");
+map.put(2, "two");
+
+Iterator<Map.Entry<Integer, String>> iterator = map.entrySet().iterator();
+while (iterator.hasNext()) {
+    Map.Entry<Integer, String> entry = iterator.next();
+    // this will throw a ConcurrentModificationException
+    if (entry.getKey() == 1) {
+        map.remove(1); 
+    }
+}
+
+A FailSafe iterator does not throw a ConcurrentModificationException if the underlying collection is 
+modified while the iterator is being used.
+ConcurrentHashMap is FailSafe.
+ConcurrentHashMap<Integer, String> map = new ConcurrentHashMap<>();
+map.put(1, "one");
+map.put(2, "two");
+
+Iterator<Map.Entry<Integer, String>> iterator = map.entrySet().iterator();
+while (iterator.hasNext()) {
+    Map.Entry<Integer, String> entry = iterator.next();
+    // this will not throw an exception
+    if (entry.getKey() == 1) {
+        map.remove(1);
+    }
+}
+
+| Collection Type    | Standard (Fail-Fast)          | ✅ Fail-Safe Alternative                                                                  | Description                                |
+| ------------------ | ----------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **List**           | `ArrayList`                   | `CopyOnWriteArrayList`                                                                   | Snapshot-based list, safe for reads/writes |
+| **Set**            | `HashSet`                     | `CopyOnWriteArraySet`                                                                    | Built on CopyOnWriteArrayList              |
+| **Map**            | `HashMap`                     | `ConcurrentHashMap`                                                                      | Uses segment/bucket-level locking          |
+| **Sorted Map**     | `TreeMap`                     | `ConcurrentSkipListMap`                                                                  | Thread-safe, naturally sorted              |
+| **Queue**          | `LinkedList`, `PriorityQueue` | `ConcurrentLinkedQueue`                                                                  | Non-blocking, thread-safe FIFO queue       |
+| **Deque**          | `ArrayDeque`                  | `ConcurrentLinkedDeque`                                                                  | Thread-safe double-ended queue             |
+| **Blocking Queue** | —                             | `LinkedBlockingQueue`, `ArrayBlockingQueue`, `PriorityBlockingQueue`, `DelayQueue`, etc. | Used for producer-consumer patterns        |
+
+
+Runtime exceptions:
+Unlike checked exceptions, runtime exceptions do not require a declaration in the throws clause or 
+capture in a try-catch block. However, handling runtime exceptions is advisable in order to provide 
+meaningful error messages and prevent a system crash.
+
+Checked Exception and Unchecked Exception:
+Checked Exceptions are the exceptions that are checked during compile time of a program. In a program, 
+if some code within a method throws a checked exception, then the method must either handle the exception 
+or must specify the exception using the throws keyword. 
+
+Checked exceptions are of two types: 
+Fully checked exceptions: all its child classes are also checked, like IOException, and InterruptedException.
+Partially checked exceptions: some of its child classes are unchecked, like an Exception. 
+
+Unchecked Exception:
+Unchecked are the exceptions that are not checked at compile time of a program. Exceptions under Error 
+and RuntimeException classes are unchecked exceptions, everything else under throwable is checked. 
+
+
+Exception rule for method override in java:
+| Can it...?                                     | Allowed?                  |
+| ---------------------------------------------- | ------------------------- |
+| Declare **no exception**                       | ✅ Yes                     |
+| Declare the **same exception**                 | ✅ Yes                     |
+| Declare a **subclass** of that exception       | ✅ Yes                     |
+| Declare a **broader or new checked exception** | ❌ No (Compile-time error) |
+
+class Parent {
+    void show() throws IOException { }
+}
+
+class Child extends Parent {
+    @Override
+    void show() throws FileNotFoundException { } // ✅ Allowed (subclass of IOException)
+}
+
+class AnotherChild extends Parent {
+    @Override
+    void show() throws Exception { } // ❌ Compile-time error (broader exception)
+}
+
+
+finally rules:
+
+| Rule # | Description                                                                            |
+| ------ | -------------------------------------------------------------------------------------- |
+| 1️⃣    | `finally` **always executes**, even if an exception is thrown or caught.               |
+| 2️⃣    | Executes even if there’s a `return`, `break`, or `continue` inside `try` or `catch`.   |
+| 3️⃣    | If the JVM shuts down (`System.exit()`), `finally` does **not** execute.               |
+| 4️⃣    | `finally` is optional but **recommended** when using `try`.                            |
+| 5️⃣    | If both `try`/`catch` and `finally` have `return`, the `finally`'s `return` overrides. |
+| 6️⃣    | `finally` is **not executed** if the thread is killed or JVM crashes.                  |
+
+
+finalize:
+finalize() is a method in the Object class that Java calls just before an object is garbage collected, 
+giving it a chance to clean up resources (like closing a file or releasing memory).
+
+@Override
+protected void finalize() throws Throwable {
+    // cleanup code
+    System.out.println("Object is being garbage collected");
+}
+
+Why finalize() is Deprecated (Java 9+)?
+Unpredictable: No guarantee when (or if) it will be called.
+Performance issue: GC delays object removal if finalize() is present.
+Safer alternatives: try-with-resources, AutoCloseable, or explicit close() methods.
+
+life cycle of the thread:
+New: The thread has been created but has not yet started.
+Runnable: The thread is running, executing its task, or is ready to run if there are no other higher-priority threads.
+Blocked: The thread is temporarily suspended, waiting for a resource or an event.
+Waiting: The thread is waiting for another thread to perform a task or for a specified amount of time to elapse.
+Terminated: The thread has completed its task or been terminated by another thread.
+
+main thread:
+main thread is considered the parent thread of all the other threads
+The main thread is automatically created when the program starts running. 
+This thread executes the main method of the program.
+
+daemon thread:
+daemon thread in Java is a low-priority thread that is used to perform background operations or 
+tasks which are used to perform continuously. such as Garbage collection, Signal dispatches, 
+Action listeners, etc. Daemon threads in Java have lower priority than user threads, 
+which means they can only execute when no user threads are running.
+
+What are the ways in which a thread can enter the waiting state?
+Sleep()
+Wait()
+Join()
+Waiting for I/O operations
+Synchronization Issues
+
+different types of Thread Priorities:
+MIN_PRIORITY
+MAX_PRIORITY
+NORM_PRIORITY 
+By default, the thread is assigned NORM_PRIORITY.
+
+Why Garbage Collection is necessary in Java?
+to avoid memory leaks which can cause the program to crash and become unstable.
+focus on the development of the application instead of managing memory resources and worrying about memory leakage.
+
+
+What is the drawback of Garbage Collection?
+1. it works to clear the memory which slows down the performance of the application. 
+2. The Process of Garbage collection is non-deterministic which makes it difficult to predict when 
+	garbage collection occurs which causes unpredictable behavior in applications. 
+	For Example, if we write any program then it is hard for programmers to decide if the issue is caused 
+	by garbage collection or by any other factors in the program. 
+3. Garbage collection can also increase memory usage if the program creates and discards a lot of 
+	short-lived objects.
+
+difference between a minor, major, and full garbage collection:
+1. Minor garbage collection: used to collect and reclaim memory that is used by short-lived objects
+2. Major garbage collection: used to collect and reclaim memory that is used by long-lived objects 
+      (objects that survive multiple minor garbage collections and are promoted to the old generation).
+
+3. Full garbage collection: During full garbage collection, memories from all generations are collected and 
+	reclaimed, including memories of young and old. 
+
+What is a memory leak, and how does it affect garbage collection:
+caused by not closing resources properly, holding onto object references longer than necessary, 
+or creating too many objects unnecessarily. 
+These useless objects which do not provide any value to the program are known as Memory leaks.
+Memory leaks can impact garbage collection negatively by preventing the garbage collector from reclaiming 
+unused memory. This behavior will lead to slow performance or sometimes system failure.
+
+3 Classes present in java.util.regex
+Pattern Class: Can define patterns
+Matcher Class: Can perform match operations on text using patterns
+PatternSyntaxException Class: Can indicate a syntax error in a regular expression pattern.
+
+Write a regular expression to validate a password. A password must start with an alphabet and followed by alphanumeric characters; Its length must be in between 8 to 20.
+
+regex = “^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8, 20}$”
+
+What is JDBC Driver?
+software component that is used to enable a Java application to interact with the database. 
+
+
+class MyCollection implements Iterable<String> {
+    private List<String> items = new ArrayList<>();
+
+    public void add(String item) {
+        items.add(item);
+    }
+
+    // Must implement the iterator() method
+    @Override
+    public Iterator<String> iterator() {
+        return items.iterator(); // Delegates to List's iterator
+    }
+}
+
+| Feature                | `List`                                                           | `Set`                                                         |
+| ---------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| Order                  | ✅ **Maintains insertion order**                                  | ❌ No guaranteed order (`HashSet`), ✅ sorted order (`TreeSet`) |
+| Duplicates             | ✅ **Allows duplicates**                                          | ❌ **Does NOT allow duplicates**                               |
+| Index-based access     | ✅ Yes (`get(int index)`)                                         | ❌ No                                                          |
+| Common Implementations | `ArrayList`, `LinkedList`                                        | `HashSet`, `LinkedHashSet`, `TreeSet`                         |
+| Performance (Search)   | O(n) in `ArrayList`                                              | O(1) in `HashSet` (using hashing)                             |
+| Use case               | When you need **ordered, indexed, duplicate-allowed** collection | When you need **unique elements only**                        |
+
+
+Atomic classes:
+They are used when multiple threads need to update a shared variable (like an integer counter or object 
+reference) without using synchronization (synchronized) or explicit locks, thereby improving performance 
+and scalability.
+| Class Name                | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| `AtomicInteger`           | For atomic operations on `int` values                |
+| `AtomicLong`              | For atomic operations on `long` values               |
+| `AtomicBoolean`           | For atomic operations on `boolean` values            |
+| `AtomicReference<V>`      | For atomic operations on object references           |
+| `AtomicIntegerArray`      | For atomic operations on arrays of `int`             |
+| `AtomicLongArray`         | For atomic operations on arrays of `long`            |
+| `AtomicReferenceArray<V>` | For atomic operations on arrays of object references |
+
+
+AtomicInteger counter = new AtomicInteger(0);
+// Atomically increments and returns new value
+counter.incrementAndGet();
+// Atomically gets the value
+int value = counter.get();
+// Atomically sets a new value
+counter.set(5);
+// Atomically compares and sets the value
+counter.compareAndSet(5, 10); // returns true if value was 5
+
+These classes use low-level atomic CPU instructions like Compare-And-Swap (CAS) via the Unsafe 
+class under the hood, ensuring updates happen atomically without locks.
+
+*** Garbage Collection Tuning:
+Reduce long pause times in applications (especially low-latency or real-time systems)
+Improve application throughput
+Avoid OutOfMemoryError
+Match GC strategy to application behavior
+
+| Option                        | Purpose                                |
+| ----------------------------- | -------------------------------------- |
+| `-Xms<size>`                  | Initial heap size                      |
+| `-Xmx<size>`                  | Max heap size                          |
+| `-XX:NewRatio=n`              | Ratio of young to old generation       |
+| `-XX:SurvivorRatio=n`         | Ratio between Eden and Survivor spaces |
+| `-XX:+UseStringDeduplication` | Enables string deduplication in G1 GC  |
+| `-XX:+PrintGCDetails`         | Print GC logs for tuning               |
+| `-Xlog:gc*`                   | GC logging in Java 9+                  |
+
+
+
+
+
+
+Microservice design patterns
+
+Observer vs promise in angular
+
+https://www.geeksforgeeks.org/java-interview-questions/#:~:text=Can%20you%20have-,virtual,-functions%20in%20Java
+	

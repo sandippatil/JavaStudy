@@ -1,0 +1,276 @@
+*** key features of Spring Security:
+1. Authentication: Process of Identifying the person trying to access the application.
+2. Authorization: Process of Identifying if the person is allowed to do this operation.
+3. Principal: To know, is the person that we have identified through an authentication process. 
+		It is also called the Currently logged-in user that we store in session.
+4. Protection: This protects against most common threats like cross-site scripting and SQL injection.
+5. Granted Authority: These are the groups of permissions that are allowed for a user.
+
+
+** How to configure Authentication in Spring Security?
+Extend WebSecurityConfigureAdapter in a custom class and use @EnableWebSecurity annotation.
+Overrides configure(AuthenticationManagerBuilder) method.
+Configure type of auth, user, password and role.
+Now, this will automatically create and configure a new Authentication Manager and then Spring Security will use this Authentication Manager instead of using the default one.
+
+@Override
+protected void configure(HttpSecurity http) throws Exception
+{
+    http.authorizeRequests()
+        .antMatchers("/author/admin")
+        .hasRole("ADMIN")
+        .antMatchers("/author/user")
+        .hasRole("USER")
+        .antMatchers("/")
+        .permitAll()
+        .and()
+        .formLogin();
+}
+
+@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Add this
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(
+                request -> request
+                    .requestMatchers("/register", "/login", "/user/getUserByUserName/**").permitAll()
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                .accessDeniedHandler(customAccessDeniedHandler())
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return httpSecurity.build();
+    }
+	
+
+
+1. CORS (Cross-Origin Resource Sharing)
+✅ What is CORS?
+A browser-side security feature
+Controls which domains are allowed to make cross-origin HTTP requests (e.g., frontend at localhost:3000 
+calling backend at localhost:8080)
+
+2. CSRF (Cross-Site Request Forgery)
+What is CSRF?
+A server-side attack where a malicious site tricks a user's browser into submitting unwanted requests 
+to your application where the user is authenticated.
+
+Affects state-changing HTTP requests (e.g., POST, PUT, DELETE)
+
+✅ In Spring Security
+Enabled by default
+Spring protects by requiring a CSRF token in such requests
+
+Disable CSRF (only when safe):
+	http.csrf().disable();  // Use with caution!
+	You’re using stateless authentication (e.g., JWT)
+	Or, your frontend is a trusted SPA making REST API calls
+
+❌ Do NOT disable CSRF if:
+	You’re using sessions and cookies for auth
+
+How CSRF works:
+Instead of trusting cookies alone, Spring requires a CSRF token:
+It’s a unique value per session
+Must be sent with each state-changing request
+Not sent by malicious sites (they can’t read the token)
+
+How Spring Uses CSRF Token
+When CSRF protection is enabled:
+Spring injects a CSRF token into your HTML form or frontend response.
+Your client must send it back with requests (usually in a header or hidden input).
+
+
+| Feature       | CORS                                  | CSRF                                      |
+| ------------- | ------------------------------------- | ----------------------------------------- |
+| Type          | **Browser security feature**          | **Application security threat**           |
+| Scope         | Controls **who can access**           | Protects against **unwanted actions**     |
+| Applies to    | Cross-origin HTTP requests            | State-changing requests (POST/PUT/DELETE) |
+| Location      | **Frontend to backend**               | **Browser to backend**                    |
+| Spring config | `http.cors()` + bean                  | `http.csrf().disable()`                   |
+| Typical use   | React/Vue app calling Spring Boot API | Prevent unauthorized form submissions     |
+
+*** Explain basic authentication in Spring Security:
+Add Spring Security Starter Dependency i.e. spring-boot-starter-security to pom.xml file.
+Extend WebSecurityConfigureAdapter in a custom class and use @EnableWebSecurity annotation.
+Override configure(HttpSecurity) method to specify security rules.
+
+@Override
+protected void configure(HttpSecurity http) throws Exception
+{
+    http.authorizeHttpRequests()
+        .anyRequest()
+        .authenticated()
+        .and()
+        .httpBasic();
+}
+
+***How to Enable and Disable CSRF:
+ http.csrf().disable();
+
+*** Filter Chain in Spring Security:
+
+Internally Spring Security maintains a filter chain with each filter having a specific responsibility. 
+Filters are added or removed from the system depending on needed services. 
+
+When to Use Spring Security antMatcher()?
+The antMatchers() is used to configure the URL paths. The URL paths either can be permitted or denied to the user’s http request. It will be done according to the role or the authorization of that particular user. Following are the rules applied on antmatchers():
+
+? – matches one character.
+* – matches zero or more characters.
+** – matches zero or more directories in a path.
+
+Following are the rules applied on antmatchers():
+
+hasAnyRole()
+hasRole()
+hasAuthority()
+hasAnyAuthority()
+authenticated()
+anonymous()
+
+| Feature      | `antMatcher()`              | `requestMatcher()`                           |
+| ------------ | --------------------------- | -------------------------------------------- |
+| Pattern type | Ant-style (e.g., `/api/**`) | Custom `RequestMatcher` implementation       |
+| Matches on   | Path only                   | Path, method, headers, query, etc.           |
+| Complexity   | Simple                      | Flexible, more complex                       |
+| Use case     | Most common URL matching    | Advanced security matching (e.g., POST-only) |
+
+
+*** How to Deny Access to All URLs in Spring Security?
+@Override
+protected void configure(HttpSecurity http) throws Exception
+{
+    http.authorizeHttpRequests()
+        .anyRequest()
+        .denyAll()
+        .and()
+        .httpBasic();
+}
+
+*** How to Get the Current Logged in User Details in Spring Security?
+We can get the Current Logged in User Details in Spring Security with the help of the 
+Authentication class. A sample code is given below.
+// Principal means username
+@GetMapping("/")
+public String helloGfg(Principal principal,
+                       Authentication auth, Model model)
+{
+    // Get the Username
+    String userName = principal.getName();
+    System.out.println("Current Logged in User is: "
+                       + userName);
+
+    // Get the User Roles/Authorities
+    Collection<? extends GrantedAuthority> authorities
+        = auth.getAuthorities();
+    System.out.println("Current Logged in User Roles are: "
+                       + authorities);
+    model.addAttribute("username", userName);
+    model.addAttribute("roles", authorities);
+    return "home-page";
+}
+
+
+*** What is Spring Security Password Encoder?
+ @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder(14);
+    }
+	
+
+** What is JWT in Spring Security
+JWT stands for JSON Web Token. It is widely used to exchange information between two ends as a JSON 
+object. It securely transforms informations. It is mostly used in the case of Authorization and 
+Information Exchange. It consists of three parts:
+1. Header -> contains the algorithm and what type of token it is.
+2. Payload -> This is the data part (payload).
+3. Signature -> It is used to verify that the data or message does not change during the information 
+				transformation.
+
+*** What is OAuth and OAuth2 in Spring Security:
+OAuth 2.0 (Open Authorization) is an authorization framework that allows third-party applications to 
+access a user's resources without exposing their credentials (like username/password).
+
+OAuth 2.0 Authorization Flow (Simplified)
+User tries to log in via a third-party app
+App redirects user to Authorization Server
+User logs in and approves access
+Server returns an Access Token to the app
+App uses token to access Resource Server (e.g., APIs)
+
+How to Implement jwt token authentication and authorization?
+@Configuration
+@EnableWebSecurity
+public class WebSecurityConfig {
+	@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Add this
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(
+                request -> request
+                    .requestMatchers("/register", "/login", "/user/getUserByUserName/**").permitAll()
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                .accessDeniedHandler(customAccessDeniedHandler())
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return httpSecurity.build();
+    }
+}
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+	@Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+
+		Collection<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+		
+		UsernamePasswordAuthenticationToken authenticationToken
+                        = new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                        null,
+                        authorities
+                );
+        authenticationToken.setDetails(
+                new WebAuthenticationDetailsSource()
+                        .buildDetails(request)
+        );
+        SecurityContextHolder.getContext()
+                .setAuthentication(authenticationToken);
+						
+	}
+}
+
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+
+@PreAuthorize("hasAuthority('ROLE_AccountAdmin')")
+@GetMapping("/getUser/{userId}")
+public UserDTO getUser(@PathVariable("userId") Long userId) {
+
+
+| Feature                | `@PreAuthorize`              | `@Secured`               | `@RolesAllowed`        |
+| ---------------------- | ---------------------------- | ------------------------ | ---------------------- |
+| Introduced by          | Spring Security (modern)     | Spring Security (legacy) | JSR-250 / Jakarta EE   |
+| Enabled by             | `prePostEnabled = true`      | `securedEnabled = true`  | `jsr250Enabled = true` |
+| Syntax                 | SpEL                         | Simple role name         | Role name              |
+| Supports SpEL          | ✅ Yes                        | ❌ No                     | ❌ No                   |
+| Roles only?            | ❌ No (can check permissions) | ✅ Yes                    | ✅ Yes                  |
+| Best for complex logic | ✅ Yes                        | ❌ No                     | ❌ No                   |
+
+
+
+
+

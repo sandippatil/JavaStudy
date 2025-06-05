@@ -1,0 +1,364 @@
+When to use parallel stream:
+| Condition                                                | Why It Matters                                             |
+| -------------------------------------------------------- | ---------------------------------------------------------- |
+| ✅ Large dataset (e.g., > 10,000 items)                   | Overhead of parallelism is worth it                        |
+| ✅ CPU-bound operations                                   | Good for math-heavy tasks, transformations, etc.           |
+| ✅ Independent operations                                 | Each element can be processed separately (no shared state) |
+| ✅ No side effects (e.g., no shared mutable variables)    | Ensures thread-safety                                      |
+| ✅ You want faster performance from multi-core processors | Utilizes all available CPU cores                           |
+
+
+Avoid parallelStream() when:
+| Condition                                                           | Why It’s Bad                                  |
+| ------------------------------------------------------------------- | --------------------------------------------- |
+| ❌ Small collections (e.g., < 1000 items)                            | Overhead outweighs benefits                   |
+| ❌ I/O-bound tasks (file, DB, HTTP calls)                            | Threads often just wait                       |
+| ❌ Using `Collectors.toMap()` with key conflicts                     | Might throw exceptions due to race conditions |
+| ❌ Shared mutable state (like modifying global counters)             | Causes concurrency issues                     |
+| ❌ You need to maintain order (like printing or appending to a list) | `parallelStream()` may reorder data           |
+
+
+Intermediate Operator(can occoure multiple times):
+1. filter
+	.filter(s->Optional.ofNullable(s).isPresent())
+	.filter(name->name.startsWith("A"))
+	.filter(student->student.gpa>3.0)
+	map.entrySet().stream().filter(entry->entry.getValue()>5)
+	
+	Predicate<Student> highSal=s->(s.department.equals("Computer Science") && s.gpa>3.5) || 
+				(s.department.equals("Electrical") && s.gpa>3.0) || (s.department.equals("Mechanical") && s.gpa>2.0);
+		
+	Predicate<Student> highS= s->{
+			if(s.department.equals("Computer Science") && s.gpa>3.5)
+				return true;
+			else
+				return false;
+	};
+		
+	Predicate<Student> pred= s->{
+			return s.gpa>0? true : s.gpa>2?true:false;			
+	}; 
+	
+2. map:
+	Student.getStudents().stream().map(s->{
+			s.setName(s.getName()+"abc");
+			return s;
+		}).forEach(System.out::println);
+		
+	names.stream().map(String::toUpperCase)
+	names.stream().map(s->s.substring(0,3))
+	students.stream().map(s->s.name)
+	stock.entrySet().stream().map(entry-> entry.getKey().toUpperCase())
+	stock.keySet().stream().map(k->k.toUpperCase())
+	stock.keySet().stream().map(String::toUpperCase)
+	
+	stock.values().stream().mapToInt(Integer::intValue).sum()
+	stock.values().stream().mapToLong(Long::valueOf).sum()
+	stock.values().stream().mapToLong(i->Long.valueOf(i)).sum()
+	stock.values().stream().mapToDouble(Double::doubleValue).sum()
+	stock.entrySet().stream().map(e-> "Key:"+e.getKey()+" val:"+e.getValue())
+		.collect(Collectors.toList());
+		
+	Student.getStudents().stream().map(s->{
+			return s.gpa>3.5? s.name +" Excelent": s.gpa>3.0? s.name+" Great": s.name+" Bad"; 
+		}).collect(Collectors.toList()).forEach(System.out::println);
+	
+	Student.getStudents().stream().map(s->Optional.ofNullable(s.name)).forEach(System.out::println);
+	
+3. mapMulti:
+		Student.getStudents().stream().mapMulti((s,downstream)->{
+			if(s.gpa>3.0) {
+				downstream.accept(s);
+				downstream.accept(new Student("Sandip", "It", 2.0));
+			}
+		}).forEach(System.out::println);
+		
+		Student.getDepertments().stream().mapMulti((d,downstream)->{			
+			d.stream().forEach(s->downstream.accept(s));
+		}).forEach(s-> System.out.println(s));
+		
+		Student.getStudents().stream().mapMulti((s,downstream)->downstream.accept(s.name+":"+s.department))
+		.forEach(System.out::println);
+		
+		Student.getStudents().stream().<Map.Entry<String, String>>mapMulti((s,downstream)->{
+			downstream.accept(Map.entry(s.name, s.department));
+		}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+4. mapToObject not in stream():
+	Used to convert primitive streams to object streams
+	IntStream.mapToObj()
+	LongStream.mapToObj()
+	DoubleStream.mapToObj()
+	IntStream.range(0, 10).mapToObj(i->"Number-"+i).collect(Collectors.toList())
+	
+	IntStream.of(0,4,6,7,8)
+	
+5. flatMap:
+	Student.getDepertments().stream().flatMap(d->d.stream())
+	.forEach(System.out::println);
+	.flatMap(student -> student.getSubjects().stream())
+	
+	listOLists.stream().flatMap(List::stream)
+	
+	List<String> sentences = List.of("hello world", "java stream", "flat map");		
+	List<String> words=sentences.stream().flatMap(s-> Arrays.stream(s.split(" "))).collect(Collectors.toList());
+	
+	List<String> csvList = List.of("1,2,3", "4,5", "6");
+	csvList.stream().flatMap(c-> Arrays.stream(c.split(","))).map(Integer::parseInt).collect(Collectors.toList());
+	
+6. distinct:
+	stock.values().stream().distinct()
+	stock.entrySet().stream().map(e->e.getValue()).distinct()
+	
+	for custom objects implement hashCode and equals
+
+7. boxed(): 
+	convert primitive streams (IntStream, LongStream, DoubleStream) into object streams (Stream<Integer>, Stream<Long>, Stream<Double>).
+	List<Integer> list = IntStream.range(1, 5)  // int stream: 1 to 4
+                                      .boxed()     // convert to Stream<Integer>
+                                      .collect(Collectors.toList());
+
+8. peek: intermediate operation that allows you to inspect or debug elements as they flow 
+		 through the stream pipeline.
+		 Unlike forEach(), peek() does not trigger stream processing — it's lazy.
+		 It’s often used for logging or debugging, not modifying elements.
+		 
+		 List<String> result = names.stream()
+        		.peek(e->System.out.println("Before"+e))
+        		.map(String::toUpperCase)
+        		.peek(e->System.out.println("After:"+e))
+        		.collect(Collectors.toList());
+	
+		List<Student> newStudents= new ArrayList<>();
+		Student.getStudents().stream().peek(s->newStudents.add(s)).toList();		
+		Student.getStudents().stream().peek(s-> sendNotification(s.name)).toList();
+		
+9. limit:
+	names.stream().limit(3).collect(Collectors.toList());
+10. skip:
+	names.stream().skip(3).collect(Collectors.toList());
+11. sorted:
+	List<String> names = List.of("Bob","Alice","David", "Charlie",  "Eva");		
+	names.stream().sorted().forEach(System.out::println);
+		
+	Student.getStudents().stream().sorted(Comparator.comparing(s->s.getName())).forEach(System.out::println);
+	Student.getStudents().stream().sorted(Comparator.comparing(Student::getName)).collect(Collectors.toList());
+		
+	System.out.println("Reversed");
+	Student.getStudents().stream().sorted(Comparator.comparing((Student s)-> s.getDepartment()).thenComparing(s->s.getName()).reversed()).forEach(System.out::println);
+	
+	List<String> namesNull = Arrays.asList("Bob", null, "Alice", "Charlie");
+		
+
+	namesNull.stream().sorted(Comparator.nullsLast(Comparator.naturalOrder())).forEach(System.out::println);
+	
+	namesNull.stream().sorted(Comparator.nullsFirst(Comparator.naturalOrder())).forEach(System.out::println);
+	
+	List<List<String>> listOfLists = List.of(
+		    List.of("a", "b"),
+		    List.of("a"),
+		    List.of("a", "b", "c")
+		);
+	
+	listOfLists.stream().sorted(Comparator.comparing(l->l.size())).forEach(System.out::println);
+	
+	Student.getStudents().stream().sorted(Comparator.comparing(s->s.getName())).forEach(System.out::println);
+	
+	Student.getStudents().stream().sorted(Comparator.comparing(s->s.getName().charAt(s.getName().length()-1))).forEach(System.out::println);
+	
+	Map<String, Integer> map = Map.of("banana", 2,"cherry", 5,"apple", 3 );
+
+	map.entrySet().stream().sorted(Map.Entry.comparingByValue()).forEach(e->System.out.println(e.getKey()+":"+e.getValue()));
+	
+	//Sort based on second char of key			
+	LinkedHashMap<String,Integer> sortedMap1=map.entrySet().stream().sorted(Comparator.comparing(e-> e.getKey().charAt(1)))
+			.collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue,(e1,e2)->e1, LinkedHashMap::new));
+			
+
+Terminal operators (at end terminal operator is necessary):
+
+1. forEach():
+	names.stream().forEach(name -> System.out.println(name));		
+	names.stream().forEach(System.out::println);
+	
+	//Streams don’t give index by default, but here’s a workaround
+	AtomicInteger index = new AtomicInteger(0);
+	names.stream().forEach(name -> System.out.println(index.getAndIncrement() + ": " + name));
+	
+	names.stream().forEach(name -> {
+	         if (name.length() > 4) {
+	             System.out.println("Long name: " + name);
+	         } else {
+	             System.out.println("Short name: " + name);
+	         }
+	    });
+	names.parallelStream().forEach(System.out::println);         // May print out of order
+	names.parallelStream().forEachOrdered(System.out::println); // Prints in stream order
+	
+	matrix.forEach(row -> row.forEach(col -> System.out.print(col + " ")));
+
+2. reduce:
+	List<Integer> list = List.of(1, 2, 3, 4);
+	Optional<Integer> mul=list.stream().reduce((a,b)->a*b);
+	mul.ifPresent(ml-> System.out.println(ml));
+	Integer sum=list.stream().reduce(0,Integer::sum);
+	list.stream().reduce(Integer::min).ifPresent(min-> System.out.println("Minimum is:"+min));
+	list.stream().reduce(Integer::max).ifPresent(max-> System.out.println("Maximum is:"+max));
+	
+	List<String> fruits=List.of("apple", "banana", "cherry");
+	String collect=fruits.stream().reduce("",(a,b)->a+b);
+	List.of("A", "B", "C").stream().reduce("", String::concat)
+	Integer sumLen=fruits.stream().reduce(0,(a,b)->a+b.length(),Integer::sum);
+	
+	List<Item> items = List.of(new Item("A", 10),new Item("B", 20),new Item("C", 30));
+	int total = items.stream().map(item -> item.price).reduce(0, Integer::sum);
+	
+3. allMatch:
+	Returns true if all elements satisfy the given predicate.
+	Returns false if any one element fails the condition.
+	Short-circuits on first failure.
+	List<Integer> numbers = List.of(2, 4, 6, 8);
+	boolean allEven=numbers.stream().allMatch(i->i%2==0);
+	boolean allStartWithA= names.stream().allMatch(s->s.startsWith("A"));
+	boolean allValid = map.entrySet().stream()
+			    .allMatch(entry -> entry.getKey().length() >= 5 && entry.getValue() > 0);
+				
+4. anyMatch:
+5. noneMatch:
+6. findFirst:
+	Optional<String> firstName=names.stream().findFirst();
+	String firstName1=names.stream().findFirst().orElse("Not found");
+	
+7. findAny:
+	A terminal operation that returns any element from the stream as Optional<T>.
+	No guarantee of order — especially in parallel streams.
+	Faster than findFirst() in parallel execution.
+8. min, max:
+	List<Integer> numbers = List.of(5, 3, 9, 1, 7);
+	Optional<Integer> min=numbers.stream().min(Integer::compareTo);
+	Optional<Integer> min1=numbers.stream().min((a,b)->a-b);
+	Optional<String> small=names.stream().min(Comparator.comparing(String::length));
+	Optional<String> small1=names.stream().min(Comparator.comparing(s->s.length()));
+	Student.getStudents().stream().min(Comparator.comparing(Student::getGpa).thenComparing(Student::getName));
+	map.entrySet().stream().min(Comparator.comparing(e->e.getValue()));
+	map.entrySet().stream().min(Map.Entry.comparingByValue());
+	
+9. toArray:
+	List<String> names = List.of("Alice", "Bob", "Charlie");
+	Object[] nameArr=names.stream().toArray();
+	String[] strArray = names.stream().toArray(String[]::new);
+	Student[] studentArray = Student.getStudents().stream().toArray(Student[]::new);
+	
+	System.out.println(Arrays.toString(strArray));
+	
+
+######### Collectors::
+1. joining:
+	String joinedNames=names.stream().collect(Collectors.joining(",","#","@"));
+	//#Alice,Bob,Bob,Charlie@
+
+2. groupingBy:
+	groupingBy(classifier)
+	groupingBy(classifier, downstreamCollector)
+	groupingBy(classifier, mapFactory, downstreamCollector)
+	 
+	List<String> names= List.of("Sandip","Sandip","Jaydeep","Anshika","Anshika","Aditi", "Arnav");
+	Map<String,Long> wordCount=names.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+	Map<String,List<String>> namesGr=names.stream().collect(Collectors.groupingBy(s->s.substring(0,1)));
+	Map<String,Long> namesCount= names.stream().collect(Collectors.groupingBy(s->s.substring(s.length()-1,s.length()),Collectors.counting()));
+	
+	List<Student> students = List.of(new Student("Alice", "CS", 90),new Student("Bob", "Math", 85),
+			    new Student("Charlie", "CS", 88),new Student("David", "Math", 60),new Student("Eve", "CS", 85)
+			);
+	
+	Map<String,List<Student>> deptStud= students.stream().collect(Collectors.groupingBy(s->s.department));
+	Map<String,Long> depCount=students.stream().collect(Collectors.groupingBy(s->s.department, Collectors.counting()));				
+	Map<String,Integer> depScore=students.stream().collect(Collectors.groupingBy(s->s.department, Collectors.summingInt(s->s.score)));		
+	Map<String,Double> deptAvg= students.stream().collect(Collectors.groupingBy(s->s.department,Collectors.averagingDouble(s->s.score)));
+	Map<String,DoubleSummaryStatistics> deptSummary=students.stream().collect(Collectors.groupingBy(s->s.department,
+				Collectors.summarizingDouble(s->s.score)));
+	
+	Map<String,List<String>> deptStudName= students.stream().collect(Collectors.groupingBy(s->s.department,
+				Collectors.mapping(s->s.name, Collectors.toList())));
+		
+	Map<String,Set<String>> uniqueDeptStudNames= students.stream().collect(
+					Collectors.groupingBy(s->s.department,Collectors.mapping(s->s.name,Collectors.toSet())));
+		
+	Map<String,Map<Integer,List<Student>>> multiGroup=students.stream().collect(
+				Collectors.groupingBy(s->s.department,Collectors.groupingBy(s->s.score)));
+		
+	Map<String,String> depStudNames= students.stream().collect(Collectors.groupingBy(s->s.department,
+				Collectors.mapping(s->s.name, Collectors.joining(","))));
+				
+	Map<String,Optional<Student>> highScoreStud=students.stream().collect(Collectors.groupingBy(s->s.department,
+				Collectors.reducing((s1,s2)-> s1.score>s2.score?s1:s2)
+				)); 
+				
+3. partitioningBy:
+	Map<Boolean,List<Student>> scoreMap=students.stream().collect(Collectors.partitioningBy(s->s.score>85));
+	Map<Boolean,Set<String>> scoreMapName=students.stream().collect(Collectors.partitioningBy(s->s.score>85,
+				Collectors.mapping(s->s.name, Collectors.toSet())));
+	Map<Boolean,String> scoreMapStr= students.stream().collect(Collectors.partitioningBy(s->s.score>85,
+				Collectors.mapping(s->s.name, Collectors.joining(","))));
+	Map<Boolean,Long> scoreCount=students.stream().collect(Collectors.partitioningBy(s->s.score>85,
+				Collectors.counting()));
+	Map<Boolean,Double> avgScore=students.stream().collect(Collectors.partitioningBy(s->s.score>85,
+				Collectors.averagingLong(s->s.score)
+				));
+
+4. counting:
+	List<String> names = List.of("Alice", "Bob", "Charlie");
+	Long count=names.stream().collect(Collectors.counting());
+	Other usages covered in other operations
+
+5. summarizingInt, summarizingDouble, summarizingLong:
+	IntSummaryStatistics stat=students.stream().collect(Collectors.summarizingInt(s->s.score));			
+	DoubleSummaryStatistics stat1=students.stream().collect(Collectors.summarizingDouble(Student::getScore));
+		
+	LongSummaryStatistics stat2= students.stream().collect(Collectors.summarizingLong(s->s.score));
+		
+	List<Integer> ints= List.of(2,4,6,8,1);
+	IntSummaryStatistics intStat= ints.stream().collect(Collectors.summarizingInt(Integer::intValue));
+		
+	List<String> strs=List.of("2","3","5");
+	strs.stream().map(Integer::parseInt).collect(Collectors.summarizingInt(Integer::intValue));
+	strs.stream().collect(Collectors.summarizingInt(Integer::parseInt));
+	
+6. mapping:
+	List<String> studNames=students.stream().collect(Collectors.mapping(s->s.name, Collectors.toList()));		
+		String names=students.stream().collect(Collectors.mapping(s->s.name+":"+s.department, Collectors.joining(", ")));
+		
+
+7. filtering:
+	Collectors.filtering(predicate, downstreamCollector)
+	List<Student> filteredStud= students.stream().collect(Collectors.filtering(s->s.getScore()>50, Collectors.toList()));	
+	List<String> filStuNames= students.stream().collect(Collectors.filtering(s->s.score>50, Collectors.mapping(s->s.name, Collectors.toList())));
+	Long passedCount=students.stream().collect(Collectors.filtering(s->s.score>50, Collectors.counting()));
+	
+8. collectingAndThen:
+	LinkedList<String> namess=names.stream().collect(Collectors.collectingAndThen(Collectors.toList(), LinkedList::new));		
+	List<String> unmodifiable = names.stream().collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));		
+	TreeSet<String> sortedList=names.stream().collect(Collectors.collectingAndThen(Collectors.toSet(), s->new TreeSet(s)));		
+	String upperNames=names.stream().collect(Collectors.collectingAndThen(Collectors.joining(","), String::toUpperCase));
+
+9.toMap:
+	toMap(keyMapper, valueMapper)
+	toMap(keyMapper, valueMapper, mergeFunction)
+	toMap(keyMapper, valueMapper, mergeFunction, mapFactory)
+	
+	Map<String,String> studDep=students.stream().collect(Collectors.toMap(s->s.name, s->s.department));	
+	Map<String,String> deptStud= students.stream().collect(Collectors.toMap(s->s.department, s->s.name, (s1,s2)->s1+","+s2 ));				
+	TreeMap<String,String> studDepSorted=students.stream().collect(Collectors.toMap(s->s.name, s->s.department,(s1,s2)->s1+","+s2,TreeMap::new));		
+	Map<String,Student> nameMap=students.stream().collect(Collectors.toMap(s->s.name, Function.identity()));		
+	Map<Key,Student> keyMap= students.stream().collect(Collectors.toMap(s-> new Key(s.name,s.department), s->s));
+	
+10. reducing:
+	Optional<Integer> sum=students.stream().map(s->s.score).collect(Collectors.reducing(Integer::sum));		
+	Integer sum1=students.stream().map(s->s.score).collect(Collectors.reducing(0,Integer::sum));
+		
+	Optional<Student> highScoreStud=students.stream().collect(Collectors.reducing((s1,s2)->s1.score<s2.score?s2:s1));
+		
+	Map<String,Integer> depSum= students.stream().collect(Collectors.groupingBy(s->s.department,
+				Collectors.reducing(0,s1->s1.score,Integer::sum)));
+				
+				

@@ -1,0 +1,332 @@
+Java 8 features:
+1. Functional Interface
+2. Lambda Expression
+3. Stream API
+4. Method Reference
+5. Optional Class
+6. Default Methods in interface
+7. Java DateTime API
+8. CompletableFuture 
+9. Comparable and Comparator
+10. MetaSpace 
+11. dependency analyser 
+
+Functional Interface:
+A Functional Interface is an interface that contains exactly one abstract method.
+It can also have:
+Any number of default or static methods
+But only one abstract method
+
+Functional Interfaces are used primarily with lambda expressions, method references, and 
+stream operations in Java 8 and above.
+
+Core Functional Interfaces:
+| Interface             | Method Signature         | Description                  |
+| --------------------- | ------------------------ | ---------------------------- |
+| `Predicate<T>`        | `boolean test(T t)`      | Tests a condition            |
+| `BiPredicate<T, U>`   | `boolean test(T t, U u)` | Two-argument predicate       |
+
+| `Function<T, R>`      | `R apply(T t)`           | Transforms `T` into `R`      |
+| `BiFunction<T, U, R>` | `R apply(T t, U u)`      | Function with two inputs     |
+
+| `Consumer<T>`         | `void accept(T t)`       | Consumes a value (no return) |
+| `BiConsumer<T, U>`    | `void accept(T t, U u)`  | Consumer with two inputs     |
+
+| `Supplier<T>`         | `T get()`                | Supplies a value (no input)  |
+
+| `UnaryOperator<T>`    | `T apply(T t)`           | A `Function<T, T>`           |
+| `BinaryOperator<T>`   | `T apply(T t1, T t2)`    | A `BiFunction<T, T, T>`      |
+
+
+2. Primitive Specializations:
+| Interface                                          | Description                    |
+| -------------------------------------------------- | ------------------------------ |
+| `IntPredicate`, `LongPredicate`, `DoublePredicate` | Predicate for primitives       |
+| `IntFunction<R>`, `LongFunction<R>`, etc.          | `Function` returning reference |
+| `ToIntFunction<T>`, `ToLongFunction<T>`            | Function returning primitive   |
+| `IntConsumer`, `LongConsumer`, `DoubleConsumer`    | Consumer for primitives        |
+| `IntSupplier`, `LongSupplier`, `DoubleSupplier`    | Supplies primitive values      |
+| `IntUnaryOperator`, `LongUnaryOperator`            | Unary operator for primitives  |
+| `IntBinaryOperator`, `LongBinaryOperator`          | Binary operator for primitives |
+
+3. Boolean-Specific
+| Interface         | Description                |
+| ----------------- | -------------------------- |
+| `BooleanSupplier` | Supplies a `boolean` value |
+
+
+
+Lambda Expression:
+A Lambda Expression in Java is a short-cut way to write anonymous methods, primarily used to implement 
+functional interfaces 
+It brings functional programming to Java and makes code more concise and readable, especially when 
+working with collections, streams, and threads.
+
+Runnable r = new Runnable() {
+    public void run() {
+        System.out.println("Hello from old Runnable!");
+    }
+};
+
+Runnable r = () -> System.out.println("Hello from Lambda!");
+
+new Thread(()->{
+	System.out.println("Hello from Lambda!");
+}).start();
+
+@FunctionalInterface
+interface MathOperation {
+    int operate(int a, int b);
+}
+
+MathOperation add = (a, b) -> a + b;
+
+Stream API:
+it is used to process collections of objects with the functional style of coding using the 
+lambda expression.
+
+What is Stream in Java 8:
+A stream is a sequence of objects that helps different methods that can be pipelined to produce the 
+desired outcome. The features of Java Stream are:
+
+Stream is not a data structure rather it takes input from Collections, Arrays, I/O channels.
+Stream doesn't change the original data structure they only provide the result as per the pipeline methods.
+
+When to use map and flatMap:
+
+map():used to transform each element of the stream using a function and returns a new stream with 
+the transformed elements.
+
+Stream<R> map(Function<? super T, ? extends R> mapper)
+T = original stream element type
+R = result type after transformation
+Takes a Function<T, R> as input
+
+List<String> upperNames = names.stream()
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());
+
+flatMap():
+flatten a stream of streams into a single stream
+dealing with nested collections 
+List<List<String>> nestedList = List.of(
+    List.of("a", "b"),
+    List.of("c", "d")
+);
+
+List<String> flatList = nestedList.stream()
+    .flatMap(List::stream)
+    .collect(Collectors.toList());
+	
+List<String> words = List.of("java", "python");
+
+List<String> letters = words.stream()
+    .flatMap(word -> Arrays.stream(word.split("")))
+    .collect(Collectors.toList());
+	
+Can we extend a functional interface from another functional interface?
+Yes, we can extend but if you extend that your functional interface will not act as a functional 
+interface because it will find multiple abstract methods inside that.
+
+Advantages of Lambda Expression?
+1. Avoid writing anonymous implementation
+2. Saves a lot of code
+3. Code is directly readable without interpretation
+
+What are all functional interfaces introduced in Java 8?
+Function
+Predicate
+Consumer
+Supplier
+Operation
+
+stream methods you used in your project?
+filter
+forEach
+sorted
+map
+max
+flatMap
+reduce
+groupingBy
+collect
+
+disadvantages of Lambda expression?
+Hard to use without an IDE
+Complex to debug
+
+Optional Class:
+This class helps in avoiding null pointer exceptions by providing methods to check the presence of a 
+value before accessing it.
+
+This helps null values handling more effectively.
+Some Optional methods are described below.
+
+of: It creates an Optional with a non-null value.
+ofNullable: It creates an Optional with a given nullable value.
+empty: It creates an empty Optional.
+isPresent: This checks whether the Optional contains a non-null value.
+ifPresentOrElse: 
+get: It gets the value if present, otherwise it throws an exception i.e. NoSuchElementException.
+orElse: It returns the value if present, otherwise returns the specified default value.
+orElseGet: It returns the value if present, otherwise it returns the result of invoking the supplier function.
+orElseThrow: It returns the value if present, otherwise it throws an exception produced by the provided supplier.
+map: It applies a function to the value if present and return a new Optional with the result, or return an empty Optional if no value is present.
+filter: It applies a predicate to the value if present and return an Optional with the value if it matches the predicate, otherwise return an empty Optional.
+
+
+Date-Time API:
+java.time package
+LocalDate, LocalTime, LocalDateTime, ZonedDateTime, and other classes.
+
+This API provides better robustness, consistency and thread safety compared to legacy Date and Calendar classes.
+
+LocalDateTime d= LocalDateTime.now();
+
+
+| Feature          | `Date` (`java.util`)    | `LocalDateTime` (`java.time`) |
+| ---------------- | ----------------------- | ----------------------------- |
+| Introduced in    | Java 1.0                | Java 8                        |
+| Mutable          | ✅ Yes                   | ❌ No (Immutable)              |
+| Thread-safe      | ❌ No                    | ✅ Yes                         |
+| Timezone support | ❌ No                    | ❌ No (use `ZonedDateTime`)    |
+| Formatting       | With `SimpleDateFormat` | With `DateTimeFormatter`      |
+| Preferred today? | ❌ No                    | ✅ Yes                         |
+
+ // Step 1: Local date-time (no zone)
+LocalDateTime localDateTime = LocalDateTime.now();
+System.out.println("LocalDateTime: " + localDateTime);
+
+// Step 2: Attach system default zone
+ZonedDateTime systemZoned = localDateTime.atZone(ZoneId.systemDefault());
+
+// Step 3: Convert to US/Pacific zone
+ZonedDateTime pacificTime = systemZoned.withZoneSameInstant(ZoneId.of("US/Pacific"));
+
+System.out.println("US/Pacific Time: " + pacificTime);
+
+localDateTime=localDateTime.withHour(localDateTime.getHour()+1);
+System.out.println(localDateTime);
+		
+Default Methods in interface:
+Default methods allows interfaces to have method implementations.
+
+Why Were Default Methods Introduced?
+To add new methods to interfaces without affecting existing classes.
+Used heavily in functional interfaces and Java Streams.
+
+interface A {
+    default void show() {
+        System.out.println("A");
+    }
+}
+
+interface B {
+    default void show() {
+        System.out.println("B");
+    }
+}
+
+class Test implements A, B {
+    @Override
+    public void show() {
+        A.super.show(); // or B.super.show();
+    }
+}
+Java forces you to override show() to resolve the conflict.
+
+
+Why we have default methods in interface if we have abstract class:
+1. A class can extend only one abstract class, but it can implement multiple interfaces.
+2. Multiple inheritance
+
+
+| Feature           | Abstract Class                 | Interface with `default` Methods  |
+| ----------------- | ------------------------------ | --------------------------------- |
+| Inheritance model | Single                         | Multiple                          |
+| Constructors      | ✅ Yes                          | ❌ No                              |
+| State (fields)    | ✅ Yes (can have instance vars) | ❌ Only constants (`static final`) |
+| Usage intention   | "is-a" relation                | "can-do" capability               |
+
+Can we have constructor in abstract class:
+Yes
+
+abstract class Animal {
+    String name;
+
+    // Constructor
+    Animal(String name) {
+        this.name = name;
+        System.out.println("Animal constructor called");
+    }
+
+    abstract void makeSound();
+}
+
+class Dog extends Animal {
+    Dog(String name) {
+        super(name); // Calls Animal's constructor
+    }
+
+    @Override
+    void makeSound() {
+        System.out.println(name + " says: Woof!");
+    }
+}
+
+
+***Find duplicate elements in list:
+Stream<Integer> stream= Stream.of(2, 17, 5, 
+                    20, 17, 30, 
+                    4, 23, 59, 23);
+Set<Integer> set= new HashSet<>();	
+stream.filter(n-> !set.add(n)).collect(Collectors.toList()).forEach(e-> System.out.println(e));
+17
+23		
+
+***find occurances
+String str = "geeksforgeeks"; 
+char c = 'g'; 
+Long countOfG=s.chars().filter(c -> c == ch).count();
+
+***get Slice of a Stream:
+str.chars().mapToObj(c->(char)c).skip(3).limit(4).forEach(c->System.out.print(c));
+
+
+Method Reference:
+Method reference is a shorthand notation of lambda expressions to call a method directly by its name.
+Introduced in Java 8, it improves readability and conciseness.
+
+// Lambda
+list.forEach(s -> System.out.println(s));
+
+// Method Reference
+list.forEach(System.out::println);
+
+Types of Method References:
+
+| Type                            | Syntax                      | Example               |
+| ------------------------------- | --------------------------- | --------------------- |
+| **Static method**               | `ClassName::staticMethod`   | `Math::abs`           |
+| **Instance method (on object)** | `object::instanceMethod`    | `System.out::println` |
+| **Instance method (on class)**  | `ClassName::instanceMethod` | `String::toUpperCase` |
+| **Constructor reference**       | `ClassName::new`            | `ArrayList::new`      |
+
+What is MetaSpace:
+Metaspace stores class metadata in native memory, separate from the heap. It can dynamically expand, 
+overcoming size limitations, and enhances garbage collection efficiency, auto-tuning, and 
+metadata distribution.
+
+It is used by the JVM to store metadata about loaded classes and methods.
+It replaces the PermGen space, offering dynamic allocation, separate memory management from the heap, 
+and improved garbage collection, thereby mitigating PermGen space errors.
+
+
+Dependency Analyzer?
+
+The Java Class Dependency Analyzer in Java 8 is a tool for analyzing dependencies between classes in a Java application.
+
+It helps in understanding the structure and interactions within a codebase.
+Useful for analyzing dependencies and managing code complexity.
+It can provide insights into potential refactoring or optimizations.
+Typically visualized through diagrams or dependency graphs for easier comprehension.

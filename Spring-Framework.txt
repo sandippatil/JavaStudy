@@ -1,0 +1,408 @@
+What is Spring Framework:
+It mainly handles all the infrastructure-related aspects allowing the developer to focus more 
+on application development
+
+versions of Spring Framework:
+
+Spring 2.5 (2007): support for annotations was introduced, reducing the need for XML configurations.
+Spring 3.0 (2009): Introduction of Spring Expression language, profile for environment-specific configurations.
+Spring 4.0 (2013): Added support for Java 8, and introduced Spring Websocket module.
+Spring 5.0 (2017): Added Spring WebFlux module for reactive programming, Supports Kotlin development.
+Spring 6.0 (2022): Adopted Java 17, Jakarta EE 9+, and enhanced support for cloud-native and reactive applications.
+Spring 6.1 (2023): Improved performance, refinements in AOT processing, and optimizations for native images.
+Spring 6.2 (2024): Further enhancements to cloud integration, modularization improvements, and better support for virtual threads.
+
+
+features of Spring Framework?
+Modular Design
+Dependency Injection
+Aspect-oriented programming
+Transaction management
+Data access
+Model-View-Controller(MVC)
+Web development
+Testing
+Spring Cloud
+
+advantages of using Spring Framework:
+High Productivity: Reduced boilerplate code(Lombok, etc), faster development(auto-config), and simplified testing(JUnit).
+Easy to Maintain: Loose coupling, separation of concerns, and cleaner code structure.
+Security: Dedicated security framework, built-in authentication and authorization, and data protection features.
+Large Community Support: Large and active community support, documentation support, etc.
+
+Explain Inversion of Control(IoC) and types of IoC containers:
+control of managing the dependencies and their injection when required from the application to the
+container/framework, It increases code scalability, maintainability, and easy testing.
+
+Types of IoC Containers:
+1. Bean Factory: Basic container, that provides basic object creation and dependency injection for spring applications.
+2. Application Context: Advanced container, is an implementation of BeanFactory. Can manage object lifecycles, 
+	events, and resource access.
+
+
+Explain Dependency Injection(DI) and its types?
+
+Dependency Injection (DI) is a design pattern used in Spring Framework (and other frameworks) 
+to inject objects (dependencies) into a class instead of letting the class create them.
+
+increasing developers' productivity by reducing boilerplate code.
+
+Why Use DI?
+Loose coupling between classes
+Better testability
+Easier maintenance and scalability
+
+Types of Dependency Injection in Spring:
+1. Constructor Injection (Recommended)
+2. Setter Injection
+3. Field Injection (Not recommended for testing)
+
+Why Constructor Injection is Recommended
+1. Immutability: You can declare dependencies as final, ensuring they can’t be changed once set.
+	private final UserService userService;
+	Helps prevent bugs
+	Encourages clean, thread-safe design
+2. Clear Dependencies:
+	Dependencies are explicitly required in the constructor.
+	No hidden dependencies = better maintainability.
+	Easy to understand, document, and test
+3. Enforced at Compile Time:
+	Missing required dependencies cause errors immediately at startup.
+	Unlike setter or field injection, which can silently fail or leave a bean partially initialized.
+4. Testability:
+	Works naturally with unit tests and mocks.
+	No need for Spring container in most unit tests.
+
+| Type             | Problem                                            |
+| ---------------- | -------------------------------------------------- |
+| Field Injection  | Hidden dependencies, hard to test, reflection used |
+| Setter Injection | Allows partial construction, mutable state         |
+
+
+Types of Metadata:
+1. Annotations: Provide information about beans and their dependencies.
+2. XML Configuration: Defines bean configurations and dependencies in an XML file.
+3. Java Configuration: Uses Java class to define bean configurations and dependencies
+	Mainly @Configuration and @Bean annotations are used for configuration.
+4. Property Sources: Store configuration settings in external sources like environment variables 
+					and property or yaml files.
+
+Explain Spring Beans and their scopes:
+Objects managed by the Spring container are called Beans..defined by configuration and annotated with @Component.
+
+Scopes: Define the lifecycle and lifetime of a bean:
+Singleton: Single instance throughout the application.
+Prototype: A new instance is created for each request.
+Request: A new instance is created for each HTTP request.
+Session: A new instance is created for each user session.
+
+@Bean
+@Scope("prototype")
+public MyPrototypeBean myPrototypeBean() {
+
+ 
+@Bean
+@Scope(WebApplicationContext.SCOPE_REQUEST)
+public MyRequestBean myRequestBean() {
+    return new MyRequestBean();
+}
+
+@RestController
+public class MyController {
+
+    @Autowired
+    private MyRequestBean myRequestBean;
+
+    @GetMapping("/test")
+    public String test() {
+        return myRequestBean.toString(); // will be different each time
+    }
+}
+
+Session scope:
+Spring stores the bean in the HTTP session (like a Map with bean names as keys).
+The bean instance is reused for all requests in the same session.
+
+What is circular dependency and how to resolve?
+A circular dependency happens when two or more Spring beans depend on each other in a loop, 
+creating a cycle that Spring can't resolve during injection.
+
+1. Use Setter or Field Injection -> Spring creates beans first, then wires dependencies — no cycle
+	@Component
+	public class A {
+		private B b;
+
+		@Autowired
+		public void setB(B b) {
+			this.b = b;
+		}
+	}
+	
+2. Use @Lazy Annotation
+@Component
+public class A {
+    private final B b;
+
+    @Autowired
+    public A(@Lazy B b) {
+        this.b = b;
+    }
+}
+
+3. Redesign Your Code (Best Practice):
+	Try to:
+		Extract shared logic into a third bean (C) that both A and B depend on		
+
+Bean life cycle in a Spring Bean Factory Container:
+1. Bean Instantiation -> Spring creates the bean using a constructor or factory method.
+2. Populate Properties (Dependency Injection)
+3. Spring injects dependencies (@Autowired, @Value, etc.).
+4. Bean Name Awareness (optional)
+	If the bean implements BeanNameAware, Spring calls setBeanName().
+5. Bean Factory Awareness (optional)
+	If the bean implements BeanFactoryAware, Spring calls setBeanFactory().
+6. Application Context Awareness (optional)
+	If the bean implements ApplicationContextAware, Spring calls setApplicationContext().
+7. Pre-Initialization Hooks
+	Custom pre-init logic from BeanPostProcessor.postProcessBeforeInitialization()
+
+8. InitializingBean / @PostConstruct
+	afterPropertiesSet() if implementing InitializingBean Or, method annotated with @PostConstruct
+
+9. Post-Initialization Hooks
+	BeanPostProcessor.postProcessAfterInitialization()
+
+10. Bean Is Ready for Use
+
+11. Destruction Phase
+	@PreDestroy or DisposableBean.destroy()
+	Occurs when the context is closed or bean is removed (except prototype beans)
+
+@Inject anotation:
+	Behaves almost exactly like @Autowired
+	Doesn't support features like required = false or @Qualifier directly
+	Used in pure Java EE / CDI environments, but Spring supports it too
+	
+
+Autowiring and its types:
+Types of Autowiring:
+No auto wiring: Setter or constructor-based dependency injection.
+By name: Matches bean names with property names for injection.
+By type: Matches bean types with property types for injection.
+Constructor: Injects dependencies through the bean's constructor.
+
+Annotation-Based Autowiring (Modern Approach)
+Spring Boot and annotation config use:
+@Autowired → By Type
+@Qualifier("beanName") → By Name
+@Inject → By Type (JSR-330)
+@Resource(name="beanName") → By Name
+
+######################  Spring Boot ###########################################
+
+Spring Boot framework is built to simplify the process of development and deployment for Spring 
+applications.
+Advantages of Spring Boot:
+1. Reduced configuration: Reduces XML configuration files, making development configuration easy.
+2. Automatic configuration: Automatically configures beans and management of dependencies.
+3. Embedded server: Tomcat is a built-in server that reduces the effort for separate server configuration.
+4. Starter POMs: Provides pre-configured starter POMs that simplify dependency management.
+5. Rapid application development: Enables rapid application development by simplifying the development process and reducing configuration overhead.
+6. Cloud-friendly: Best choice for cloud deployment with support across various cloud platforms.
+
+@SpringBootApplication:
+The @SpringBootApplication annotation performs several tasks as it contains features of three annotation 
+will are 
+1. @Configuration
+2. @EnableAutoConfiguration
+3. @ComponentScan
+
+1. @SpringBootApplication enables component scanning for beans and auto-configuration.
+2. Registers various beans, including Spring Boot auto-configuration beans.
+3. Instantiates the embedded server
+4. Runs the application
+
+@EnableAutoConfiguration:
+this annotation tells spring: Try to automatically configure beans based on the dependencies on the classpath.
+When Spring Boot sees @EnableAutoConfiguration, it:
+
+Scans all META-INF/spring.factories files
+Loads a list of @Configuration classes (from libraries like Web, JPA, Redis, etc.)
+Automatically registers beans like:
+DispatcherServlet for web apps
+DataSource for databases
+EntityManagerFactory for JPA
+JacksonObjectMapper for JSON
+
+@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
+
+types of configuration:
+1. Default configuration: Defaults configuration with available libraries and dependencies.
+2. Custom configuration: It can override default configuration through
+	properties files
+	environment variables
+	annotations
+3. External configuration: import configuration from external sources like
+	Git repositories
+	cloud platforms
+	
+How to Activate Spring Profiles:
+1. Set Environment Variable
+	export SPRING_PROFILES_ACTIVE=dev
+2. Set in Application Server (e.g., Tomcat)
+	-Dspring.profiles.active=dev
+3. Set in application.properties (fallback)
+	spring.profiles.active=${ENV_PROFILE:dev}
+	This uses environment variable ENV_PROFILE
+	Defaults to dev if not set
+4. Use .env File (Spring Boot + Docker)
+	SPRING_PROFILES_ACTIVE=prod
+	Dockerfile should pass the env or use --env-file .env
+
+5. Set in Kubernetes (Spring Boot + K8s)
+	deployment.yaml
+	env:
+	  - name: SPRING_PROFILES_ACTIVE
+		value: prod
+
+Actuator and its usage in Spring Boot:
+provides a RESTful API for monitoring and managing Spring Boot applications. These endpoints provide 
+information about applications that can be used to optimize resources and debug issues, including:
+Environment variables
+Thread dumps
+Health checks
+Metrics
+Beans
+Logs
+
+What is Spring AOP and proxy pattern?
+Aspect-oriented programming (AOP) is a design pattern that helps us manage aspects 
+like logging, security, and transaction management in applications.
+
+Spring AOP provides an implementation of AOP using dynamic proxies.
+The proxy pattern is a software design pattern that creates a proxy object that intercepts incoming 
+requests and controls access to another object before reaching the bean. 
+In Spring AOP, dynamic proxies are used to implement aspects.
+
+
+Explain key components of AOP:
+| Component         | Description                                                             |
+| ----------------- | ----------------------------------------------------------------------- |
+| **Aspect**        | A class that contains cross-cutting logic (a concern like logging)      |
+| **Join Point**    | A specific point in execution (like a method call) where advice can run |
+| **Advice**        | The action taken at a join point (like "log before this method")        |
+| **Pointcut**      | A rule that matches join points (e.g., all methods in a package)        |
+| **Weaving**       | The process of applying aspects to target objects                       |
+| **Target Object** | The object whose method execution is being advised                      |
+| **Proxy**         | A dynamic wrapper that applies advice around the target object          |
+
+
+@Aspect
+@Component
+public class LoggingAspect {
+
+    @Before("execution(* com.example.demo.service.*.*(..))")
+    public void logBeforeMethod(org.aspectj.lang.JoinPoint joinPoint) {
+        System.out.println("🔍 [Before] Calling: " + joinPoint.getSignature().getName());
+    }
+
+    @After("execution(* com.example.demo.service.*.*(..))")
+    public void logAfterMethod(org.aspectj.lang.JoinPoint joinPoint) {
+        System.out.println("✅ [After] Completed: " + joinPoint.getSignature().getName());
+    }
+
+    @AfterReturning(pointcut = "execution(* com.example.demo.service.*.*(..))", returning = "result")
+    public void logAfterReturn(org.aspectj.lang.JoinPoint joinPoint, Object result) {
+        System.out.println("✅ [AfterReturning] Method returned successfully");
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.example.demo.service.*.*(..))", throwing = "ex")
+    public void logAfterThrow(org.aspectj.lang.JoinPoint joinPoint, Throwable ex) {
+        System.out.println("❌ [AfterThrowing] Exception: " + ex.getMessage());
+    }
+
+    @Around("execution(* com.example.demo.service.*.*(..))")
+    public Object logAround(ProceedingJoinPoint pjp) throws Throwable {
+        String methodName = pjp.getSignature().getName();
+        System.out.println("⏱️ [Around-Before] Starting method: " + methodName);
+        long start = System.currentTimeMillis();
+
+        try {
+            Object result = pjp.proceed(); // proceed to actual method
+            long end = System.currentTimeMillis();
+            System.out.println("✅ [Around-After] Finished method: " + methodName + " in " + (end - start) + "ms");
+            return result;
+        } catch (Throwable ex) {
+            System.out.println("❌ [Around] Exception in method: " + methodName);
+            throw ex; // rethrow to let @AfterThrowing and caller handle it
+        }
+    }
+}
+
+What are the advantages of AOP and its implementation?
+AOP helps to maintain, modify, and understand code easily,
+
+Modularization: separation of concerns like logging, security, etc from core business logic, to increase maintainability.
+Reusability: Bundles concerns in reusable aspects, improving code reusability.
+Interception: Allows interception and modification of method calls, enabling features like logging, security, and caching.
+
+HibernateTemplate class: Provides an interface for data access operations like the one below, 
+without writing SQL queries.
+get
+load
+save
+update
+delete
+
+MVC Components:
+DispatcherServlet: Receives all requests and routes them to the appropriate controller.
+Model: Java objects that are passed between controller and view.
+View: User interface for displaying the model.
+Controller: Central component to handle user requests and responses, from model to view.
+
+
+Filters vs Interceptors:
+
+| Feature               | **Filter** (Servlet)                         | **Interceptor** (Spring MVC)                    |
+| --------------------- | -------------------------------------------- | ----------------------------------------------- |
+| **Level**             | Servlet-level (javax.servlet)                | Spring MVC-level                                |
+| **Interface**         | `javax.servlet.Filter`                       | `HandlerInterceptor`                            |
+| **Applied To**        | All requests (static, REST, JSP, etc.)       | Only **Spring MVC** mapped requests             |
+| **Use Case**          | Logging, security headers, encoding          | Authentication, logging, modifying model/view   |
+| **Access to Handler** | ❌ No                                         | ✅ Yes (has access to controller info)           |
+| **Ordering**          | Set via `@Order` or `FilterRegistrationBean` | Registered in `WebMvcConfigurer`                |
+| **Scope**             | Broader (works even outside Spring context)  | Narrow (only Spring DispatcherServlet requests) |
+
+
+@Component
+public class RequestLoggingFilter implements Filter {
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response,
+                         FilterChain chain) throws IOException, ServletException {
+        System.out.println("🌐 Filter - Request received");
+        chain.doFilter(request, response);
+    }
+}
+
+@Component
+public class AuthInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("🔐 Interceptor - Checking auth before controller");
+        return true; // return false to block the request
+    }
+}
+
+
+| Annotation        | Use Case (One-Line Explanation)                                        |
+| ----------------- | ---------------------------------------------------------------------- |
+| `@RequestMapping` | Generic mapping for any HTTP method; used for flexible configurations. |
+| `@GetMapping`     | Maps HTTP **GET** requests (e.g., fetch data).                         |
+| `@PostMapping`    | Maps HTTP **POST** requests (e.g., create a new resource).             |
+| `@PutMapping`     | Maps HTTP **PUT** requests (e.g., replace an existing resource).       |
+| `@DeleteMapping`  | Maps HTTP **DELETE** requests (e.g., remove a resource).               |
+| `@PatchMapping`   | Maps HTTP **PATCH** requests (e.g., partially update a resource).      |
+

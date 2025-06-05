@@ -1,0 +1,372 @@
+https://www.geeksforgeeks.org/microservices-interview-questions/
+
+*** Benefits of Microservices architecture:
+1. Loosely Coupled
+2. Decentralization: Data storage management is decentralized
+3. independent Deployment.. Can deploy specific service only
+4. Scalability:
+	Individual services can be scaled independently based on demand.
+5. Efficiency:
+	Efficient use of resources
+6. Technology Diversity: Java, Python, Node.js
+7. Fault Isolation: A failure in one service (e.g., email-service) doesn't bring down the whole system.
+					Easier to debug and recover from issues.
+8. increase Productivity:
+	Smaller, focused teams can work on different services in parallel.
+9. Better Maintainability: Smaller codebases are easier to understand, test, and modify.
+10. Improved Reusability: Services can be reused across different projects or products
+11. Easy Integration with DevOps: Microservices work well with containerization.. Docker, Kubernetes
+
+*** Pros and Cons of Java Microservices:
+Pros:
+We can use different technologies using microservices.
+It takes care of the security of each service.
+More than one service can be parallelly developed and deployed.
+Services are independently managed.
+Better scalability and agility.
+
+Cons:
+Communication between microservices can be complex.
+Large numbers of service management is difficult.
+Handling microservices with different business requirements is a tough task.
+So many configurations have to do which increases efforts.
+Network maintenance is difficult.
+Complex development and Security issues.
+
+
+*** Explain SOA (Service-Oriented Architecture):
+
+Microservices design patterns:
+1. API Gateway Pattern -> A single entry point for all client requests.
+	Handles routing, load balancing, authentication, and rate limiting.
+	👉 Tools: Spring Cloud Gateway, Kong, AWS API Gateway
+
+2. Service Discovery Pattern -> Automatically register and discover services in dynamic environments
+	Tools: Eureka, Consul, Zookeeper
+	
+3. Circuit Breaker Pattern:
+	Prevents a service from repeatedly trying to call a failed service.
+	Avoids cascading failures.
+	Tools: Resilience4j
+
+4. Retry Pattern:
+	Automatically retry a failed request a limited number of times.
+	Useful for transient network errors.
+
+5. Database per Service Pattern:
+	Each microservice has its own database schema for full decoupling.
+	Promotes autonomy and independent scalability.
+
+6. Asynchronous messaging:  Each services communicate with each other through message queues like Kafka or RabbitMQ.
+
+7. Saga Pattern: to manage transactions between multiple microservices
+	A saga is a sequence of local transactions. Each service completes its local transaction and 
+	then triggers the next step via an event or API call. If any step fails, a compensating transaction 
+	is executed to roll back the previous steps.
+	
+8. CQRS (Command Query Responsibility Segregation)
+	Separate read and write models for better scalability and performance.
+
+
+*** Main Components of Java Spring Boot Microservices:
+Service Registry
+API Gateway
+Cloud Infrastructure
+Containerization and Orchestration
+Message Broker
+Security
+Monitoring
+
+*** commonly used tools for Java Spring Boot Microservices:
+1. Docker
+2. Kubernetes
+3. Spring Cloud
+
+*** How do Microservices Communicate with each other?:
+1. HTTP/REST
+2. Message queues
+3. RPC (Remote Procedure Call) Framework: RPC frameworks such as gRPC uses in services for communication purposes.
+
+*** 3 ways to call rest microservices:
+1. RestTemplate (Legacy)
+Type: Synchronous, blocking
+Use Case: Simple HTTP calls, small projects
+Status: Deprecated (not actively developed)
+🔸 Pros:
+Easy to use
+Widely known, well-documented
+Good for quick prototyping
+
+🔸 Cons:
+Blocking I/O (not suitable for reactive systems)
+Limited extensibility
+Will be replaced by WebClient in the future
+
+2. WebClient (Modern)
+Type: Asynchronous, non-blocking (reactive)
+Use Case: Reactive applications or when you need performance/scalability
+🔸 Pros:
+Non-blocking, better performance for high concurrency
+Supports reactive streams
+More flexible: supports custom headers, filters, OAuth2, etc.
+
+🔸 Cons:
+Slightly more complex syntax
+Requires reactive mindset and code (Mono, Flux)
+
+@Bean
+public WebClient webClient() {
+  return WebClient.builder().baseUrl(addressBaseUrl).build();
+}
+
+AddressResponse addressResponse = webClient.get().uri("/address/" + id)
+				.retrieve().bodyToMono(AddressResponse.class).block();
+				
+
+3. FeignClient (Declarative)
+Type: Declarative HTTP client by Netflix (Spring Cloud)
+Use Case: Inter-service communication in microservices
+It is a declarative REST Client in Spring Boot Web Application. Declarative REST Client means to specify the client specification as an Interface and spring boot will take care of the implementation.
+With the help of FeignClient, writing web services is very simple.
+It is mostly used to consume REST API endpoints exposed by third parties or microservices.
+
+🔸 Pros:
+Clean and declarative syntax
+Works well with Spring Cloud, Eureka, and Ribbon
+Supports load balancing, retry, fallback (with Resilience4J or Hystrix)
+
+🔸 Cons:
+Slightly less control over low-level details (compared to WebClient)
+Requires Spring Cloud dependencies
+
+@FeignClient(name = "user-service")
+public interface UserClient {
+    @GetMapping("/users/{id}")
+    UserDTO getUser(@PathVariable("id") Long id);
+}
+
+| Feature              | `RestTemplate`         | `WebClient`                   | `FeignClient`                           |
+| -------------------- | ---------------------- | ----------------------------- | --------------------------------------- |
+| Type                 | Synchronous (blocking) | Asynchronous (non-blocking)   | Synchronous or reactive (via WebClient) |
+| Best For             | Simple REST calls      | Reactive systems, performance | Microservices, declarative calls        |
+| Declarative?         | ❌                      | ❌                             | ✅                                       |
+| Spring Cloud Support | ❌                      | ✅                             | ✅                                       |
+| Deprecated?          | ✅ (legacy)             | ❌                             | ❌                                       |
+| Complexity           | Low                    | Medium                        | Low (declarative)                       |
+
+
+| Use Case                                            | Preferred Client         |
+| --------------------------------------------------- | ------------------------ |
+| Small project, simple HTTP calls                    | `RestTemplate` (for now) |
+| Reactive or high-concurrency systems                | `WebClient`              |
+| Microservices with service discovery/load balancing | `FeignClient`            |
+
+
+
+| Traditional (Imperative)      | Reactive (Non-blocking)            |
+| ----------------------------- | ---------------------------------- |
+| Waits for each task to finish | Subscribes and continues           |
+| Blocks the thread             | Uses event loop and callbacks      |
+| Synchronous                   | Asynchronous                       |
+| Not efficient under high load | Scales better, especially with I/O |
+
+Reactive (Non-blocking with WebClient):
+WebClient client = WebClient.create();
+client.get()
+      .uri("http://api/data")
+      .retrieve()
+      .bodyToMono(String.class)
+      .subscribe(System.out::println);  // Reacts when data arrives
+
+Why Use Reactive Programming?
+Handles high concurrency with fewer threads
+Perfect for I/O-heavy applications (web services, messaging)
+Reduces resource usage
+Enables real-time and stream-based data handling
+
+| Language   | Reactive Library                 |
+| ---------- | -------------------------------- |
+| Java       | Project Reactor (Spring), RxJava |
+| JavaScript | RxJS                             |
+| Python     | RxPY, asyncio                    |
+| C#         | Reactive Extensions (Rx.NET)     |
+
+Reactive programing with Feign client:
+@EnableReactiveFeignClients
+@ReactiveFeignClient(name = "user-service", url = "http://localhost:8081")
+public interface UserClient {
+    @GetMapping("/users/{id}")
+    Mono<UserDTO> getUser(@PathVariable("id") String id);
+}
+
+@Service
+public class MyService {
+	public Mono<UserDTO> fetchUser(String id) {
+        return userClient.getUser(id);
+    }
+
+@RestController
+@RequestMapping("/api")
+public class UserController {
+	@GetMapping("/users/{id}")
+    public Mono<ResponseEntity<UserDTO>> getUserById(@PathVariable String id) {
+        return myService.fetchUser(id)
+            .map(user -> ResponseEntity.ok(user))
+            .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+	
+Under the hood, it uses WebClient instead of HttpURLConnection.
+Requests are non-blocking, so multiple calls can run in parallel without blocking threads.
+
+| Feature            | Traditional Feign     | Reactive Feign         |
+| ------------------ | --------------------- | ---------------------- |
+| Blocking           | ✅ Yes                 | ❌ No (non-blocking)    |
+| Return Type        | POJO                  | `Mono<T>` / `Flux<T>`  |
+| Thread-per-request | ✅ Yes                 | ❌ No (reactive loop)   |
+| Best For           | Simpler microservices | Reactive microservices |
+
+
+When to Use Reactive Feign
+You’re building a reactive application using Spring WebFlux
+Your services need high concurrency and non-blocking I/O
+You want to keep declarative HTTP clients (@FeignClient) while going reactive
+
+What is Client-Side Load Balancing?
+Client-side load balancing means that the client (caller) is responsible for choosing which 
+server instance to send the request to — not a central load balancer.
+
+How It Works
+The client (e.g., a microservice using WebClient or FeignClient) queries a service registry 
+		(like Eureka, Consul) for available instances.
+It picks one using a load balancing algorithm (like round-robin, random, weighted, etc.).
+It sends the request directly to the chosen instance.
+
+| Feature                   | Server-Side (e.g., NGINX) | Client-Side (e.g., Spring Cloud) |
+| ------------------------- | ------------------------- | -------------------------------- |
+| Who chooses server?       | Load balancer (external)  | Client (internal)                |
+| Example                   | NGINX, HAProxy, ALB       | Eureka + Feign/WebClient         |
+| Central point of failure  | ✅ Yes                     | ❌ No                             |
+| Flexibility               | ❌ Limited                 | ✅ High                           |
+| Scaling and routing logic | On load balancer          | On client                        |
+
+*** How Load Balancing Happens in Java Spring Boot Microservices using Netflix’s Ribbon?
+
+We can only use the Netflix Ribbon for having the client-side load balancing.
+@FeignClient(name = "address-service", path = "/address-service")
+@RibbonClient(name = "address-service")
+public interface AddressClient {
+
+    @GetMapping("/address/{id}")
+    public ResponseEntity<AddressResponse> getAddressByEmployeeId(@PathVariable("id") int id);
+
+}
+
+application.properties:
+address-service.ribbon.listOfServers=http://localhost:8081, http://localhost:8082
+
+
+How Eureka Server and Client Communicate with Each Other in Java Microservices?
+1. Service Registration
+		On startup, the client sends a registration request to the Eureka server.
+		This includes metadata: service ID, IP, port, health URL, etc.
+2. Heartbeat / Lease Renewal:
+	Every 30 seconds (by default), the client sends a heartbeat to renew its lease.
+	If heartbeat stops, server evicts the instance after 90 seconds (configurable).
+3. Service Discovery (Client Fetches Registry):
+	Clients periodically pull the list of registered services from the Eureka server.
+	This local cache is used for client-side load balancing (e.g., with Ribbon or Spring Cloud 
+	LoadBalancer).
+
+*** How to Develop API Gateway in Java Spring Boot Microservices?
+We can develop API Gateway in Java Spring Boot Microservices by using "Spring Cloud Gateway".
+
+It is Built on Spring Framework 5, Project Reactor, and Spring Boot 2.0
+We can integrate the Circuit Breaker with the Spring Cloud Gateway.
+We can integrate Spring Cloud DiscoveryClient.
+Predicates and filters are specific to routes.
+Path Rewriting.
+It can match routes on any request attribute.
+
+*** is Eureka client side service discovery?
+yes
+The client (caller) is responsible for:
+ Client does:
+	Calls Eureka: “Give me all instances of user-service”
+	Gets a list: user-service-1, user-service-2
+	Applies load balancing (e.g., round-robin)
+	Sends the HTTP request directly to the chosen instance
+
+| Feature                   | Client-Side Discovery (Eureka) | Server-Side Discovery (e.g., AWS ALB, Kubernetes Service) |
+| ------------------------- | ------------------------------ | --------------------------------------------------------- |
+| Who chooses instance?     | The **client**                 | The **load balancer / proxy**                             |
+| Example                   | Eureka, Consul (client-side)   | Kubernetes Services, NGINX, AWS ELB/ALB                   |
+| Load balancing handled by | Client                         | Proxy/load balancer                                       |
+| Direct communication?     | ✅ Yes                          | ❌ No (goes through proxy/load balancer)                   |
+
+*** Server side Service discovery:
+Example:
+NGNIX
+AWS ELB
+
+** Why Use Spring Cloud for Microservices Development?
+We can solve all these problems with those sub-projects.
+Spring Cloud Config Server
+Service registration and discovery using Eureka
+Spring Cloud LoadBalancer
+resilience4j-ratelimiter
+Circuit Breakers Pattern
+
+Explain 5 Major Challenges and Solutions of Java Spring Boot Microservices Architecture:
+Challenge 1: Service Configuration Management
+	Solution: Spring Cloud Config Server centralizes configuration management for microservices.
+Challenge 2: Service Discovery and Registration
+	Solution: Eureka enables dynamic service discovery and registration.
+Challenge 3: Load Balancing Across Microservices
+	Solution: Spring Cloud LoadBalancer distributes traffic evenly among microservice instances.
+Challenge 4: Resilience and Fault Tolerance
+	Solution: resilience4j-ratelimiter implements rate limiting to maintain stability under heavy load.
+Challenge 5: Handling Failures and Circuit Breakers
+	Solution: Circuit Breaker pattern with tools like Hystrix provides fault isolation and fallback mechanisms.
+
+** Tell Some Major Reasons to Choose Spring Boot For Microservices Development:
+Embedded Server
+Support Load Balancer
+Auto Configuration
+Minimal Code using Annotations
+Loose Coupling
+Dependency Management
+Open Source
+
+Circuit Breaker:
+A Circuit Breaker is a design pattern used to prevent cascading failures in a distributed system.
+It monitors remote calls and stops trying if the service is failing repeatedly.
+
+Why Use a Circuit Breaker?
+	In microservices, if one service becomes slow or unavailable, and others keep calling it:
+	It can lead to thread exhaustion, timeouts, and system crashes.
+	Circuit breaker helps the system stay resilient by failing fast.
+
+Circuit Breaker States:
+1. CLOSED    => Requests flow normally
+2. OPEN      => Requests are blocked and fallback is triggered
+3. HALF-OPEN => Limited trial requests are allowed to test if the service recovered
+
+@CircuitBreaker(name = "userService", fallbackMethod = "userFallback")
+public String getUserDetails(String userId) {
+    return restTemplate.getForObject("http://user-service/api/users/" + userId, String.class);
+}
+
+public String userFallback(String userId, Throwable t) {
+    return "Default User";
+}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+

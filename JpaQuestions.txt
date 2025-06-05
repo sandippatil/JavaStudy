@@ -1,0 +1,334 @@
+https://www.interviewbit.com/jpa-interview-questions/
+
+** Cascades:
+cascade refers to operations that should be automatically propagated from a parent entity to its 
+associated child entities
+A cascade tells the JPA provider (e.g., Hibernate) what operations on a parent entity should automatically
+ be applied to its related entities.
+
+Types:
+| Cascade Type          | Description                                                                      |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `CascadeType.ALL`     | Applies all cascade types below (save, update, delete, etc.)                     |
+| `CascadeType.PERSIST` | When the parent is persisted (saved), the child entity is also persisted         |
+| `CascadeType.MERGE`   | When the parent is merged (updated), the child entity is merged                  |
+| `CascadeType.REMOVE`  | When the parent is deleted, the child entity is also deleted                     |
+| `CascadeType.REFRESH` | When the parent is refreshed from the database, child is also refreshed          |
+| `CascadeType.DETACH`  | When the parent is detached from persistence context, the child is also detached |
+
+@Entity
+public class User {   
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Order> orders;
+}
+If you save a User, all their orders will be saved.
+If you delete a User, all their orders will also be deleted.
+
+** JpaRepository.save() and JpaRepository.saveAndFlush() 
+
+userRepository.save(user):
+The actual write to the database may be delayed (i.e., deferred until the transaction is 
+committed or flush is called).
+
+userRepository.saveAndFlush(user):
+Saves the entity and immediately flushes the persistence context.
+Useful when you want to guarantee the data is persisted at that exact point.
+
+Equivalent to:
+userRepository.save(user);
+entityManager.flush();
+
+** @Transactional
+@Service
+@Transactional
+public class EmployeeService {
+
+all public methods in the class will be executed within a transaction.
+
+** 1. Attached Entity (Managed Entity):
+An attached or managed entity is an instance that is currently tracked by the Persistence Context 
+(i.e., EntityManager).
+This means any changes made to it are automatically detected and synchronized with the database.
+
+Entity is in the managed state.
+Inside an active transaction, changes are auto-detected and saved on flush/commit.
+You don’t need to explicitly call save() or merge() to persist changes.
+
+User user = entityManager.find(User.class, 1L); // managed
+user.setName("New Name"); // automatically tracked
+// No need to call save(); it's updated on commit
+
+** 2. Detached Entity:
+A detached entity is no longer tracked by the Persistence Context.
+Changes made to it are not persisted automatically unless you reattach it using merge().
+
+Outside the persistence context.
+Commonly seen after a transaction ends, or after serialization/deserialization (e.g., sending over a network).
+You must call merge() to reattach and persist changes.
+
+User user = entityManager.find(User.class, 1L); // managed
+entityManager.detach(user); // now detached
+user.setName("Detached Name"); // not tracked
+entityManager.merge(user); // reattaches and updates DB
+
+** JPA:
+JPA helps in mapping Java objects to relational database tables and allows developers to perform 
+CRUD (create, read, update, delete) operations on data.
+
+** @JoinColumn
+The @JoinColumn annotation is used in JPA (Java Persistence API) to define the foreign key column in an 
+entity relationship.
+
+@ManyToOne
+@JoinColumn(name = "user_id") // foreign key in Order table
+private User user;
+
+** EntityManager.find() and EntityManager.getReference():
+EntityManager.find():
+	Immediately fetches the entity from the database.
+	Returns a fully initialized object.
+	If the entity is not found, returns null.
+	
+EntityManager.getReference()
+	Returns a lazy proxy to the entity.
+	Does not hit the database immediately.
+	The actual database access happens only when a method is called on the proxy.
+	Throws EntityNotFoundException if the entity does not exist and is accessed.
+	
+** EntityManager:
+	Creating and removing entity objects.
+	Retrieving entity objects from the database.
+	Updating and persisting changes made to entity objects.
+	Managing the association between entities.
+	Managing the lifecycle of entity objects.
+	Executing queries on the database using JPQL (Java Persistence Query Language).
+	Caching entity objects for improved performance
+
+*** NamedQuery:
+Using named queries in JPA has several benefits, including:
+Reusability: named queries can be defined once and used multiple times throughout the application.
+Performance: named queries are compiled and cached by the JPA provider, which can improve performance for frequently used queries.
+Maintenance: named queries can be easily modified or updated in a central location, rather than scattered throughout the codebase.
+
+@Entity
+@NamedQuery(
+    name = "User.findByStatus",
+    query = "SELECT u FROM User u WHERE u.status = :status"
+)
+public class User {
+    // fields
+}
+
+Repository:
+@Query(name = "User.findByStatus")
+List<User> findByStatus(@Param("status") String status);
+
+** query methods:
+createQuery(): This method creates a JPQL (Java Persistence Query Language) query
+createNamedQuery(): @NamedQuery annotation.
+createNativeQuery(): native SQL query
+createQuery(criteriaQuery): 
+
+
+***
+| Feature              | `CrudRepository` | `JpaRepository` |
+| -------------------- | ---------------- | --------------- |
+| Basic CRUD           | ✅                | ✅               |
+| Pagination           | ❌                | ✅               |
+| Sorting              | ❌                | ✅               |
+| Batch operations     | ❌                | ✅               |
+| JPA-specific methods | ❌                | ✅               |
+
+
+public interface UserRepository extends CrudRepository<User, Long> {
+    // You get save(), findById(), delete(), etc.
+}
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    // Includes all methods from CrudRepository + more
+	findAll(Sort sort)
+	findAll(Pageable pageable)
+	flush()
+	saveAndFlush()
+	deleteInBatch()
+	getOne()
+}
+
+
+JpaRepository
+    ↳ PagingAndSortingRepository
+        ↳ CrudRepository
+            ↳ Repository
+
+** Advantages of using JPA over JDBC:
+Object-Relational Mapping
+Portability -> port to different db
+Increased Productivity
+Improved Performance ->  caching mechanism
+Transaction Management -> Simplified
+Object-Oriented Features -> inheritance and polymorphism
+
+
+| Cache Level         | Scope                  | Description                                |
+| ------------------- | ---------------------- | ------------------------------------------ |
+| **1st-Level Cache** | Per `EntityManager`    | Built-in, automatic, not shared            |
+| **2nd-Level Cache** | Shared across sessions | Must be enabled, configurable via provider |
+| **Query Cache**     | Shared                 | Caches query result sets (opt-in)          |
+
+Redis (via Spring Cache abstraction)
+Ehcache (v3 supports distributed via clustering)
+Hazelcast
+Infinispan
+Apache Ignite
+
+@EnableCaching
+@Cacheable(value = "users", key = "#id")
+
+2nd-level caching using SharedCacheMode
+
+| Mode                | Description                                                         |
+| ------------------- | ------------------------------------------------------------------- |
+| `ALL`               | All entities are cached unless explicitly excluded                  |
+| `NONE`              | No entities are cached unless explicitly included                   |
+| `ENABLE_SELECTIVE`  | Only cache entities marked with `@Cacheable(true)`                  |
+| `DISABLE_SELECTIVE` | Cache all entities **except** those marked with `@Cacheable(false)` |
+| `UNSPECIFIED`       | Provider default (typically `NONE` or `ENABLE_SELECTIVE`)           |
+
+CacheConcurrencyStrategy Options:
+| Strategy               | Description                                                                               | Performance | Consistency     |
+| ---------------------- | ----------------------------------------------------------------------------------------- | ----------- | --------------- |
+| `READ_ONLY`            | For **immutable entities** (no updates). Extremely fast, but throws exception if updated. | 🔥 Fastest  | ✅ Strong        |
+| `NONSTRICT_READ_WRITE` | Allows stale data; no guarantees about consistency. No locking used.                      | ⚡ Fast      | ❌ Weak          |
+| `READ_WRITE`           | Uses soft locking. Guarantees strong consistency using versioning.                        | ⚖️ Balanced | ✅ Strong        |
+| `TRANSACTIONAL`        | Used with **JTA** and **fully transactional cache providers** (e.g., Infinispan).         | 🚀 High     | ✅ Very Strong   |
+| `NONE`                 | No caching (explicit opt-out).                                                            | ❌ No cache  | ✅ DB Consistent |
+
+
+** JPQL is same as HQL -> Java Persistence Query Language
+
+** JPA Providers in spring data jpa:
+| Provider                | Description                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| **Hibernate** (Default) | Most popular and widely used JPA provider. Rich feature set, active community. |
+| **EclipseLink**         | Reference implementation of JPA by the Eclipse Foundation.                     |
+| **OpenJPA**             | Apache’s JPA provider, less commonly used today.                               |
+| **DataNucleus**         | Supports JPA and other standards like JDO. Useful in niche scenarios.          |
+
+** ORM vs JPA vs Hibernate:
+ORM is a Framework
+JPA (Java Persistence API) is a specification for ORM (Object-Relational Mapping) in Java, 
+Hibernate is an implementation of JPA.
+
+
+** Entity States:
+| State                    | Description                                                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **New (Transient)**      | The entity has just been created using `new`. It is **not associated** with any persistence context.                                          |
+| **Managed (Persistent)** | The entity is attached to the current **`EntityManager`** and is being tracked. Any changes will be automatically **synchronized to the DB**. |
+| **Detached**             | The entity was once managed but is now **no longer attached** to a persistence context. Changes **won’t be saved** unless reattached.         |
+| **Removed**              | The entity is marked for **deletion**. Will be deleted from DB when the transaction is committed.                                             |
+
+** types of identifier generation:
+GenerationType.AUTO -> strategy is determined by the JPA provider
+GenerationType.IDENTITY -> Auto increment
+GenerationType.SEQUENCE
+GenerationType.TABLE
+GenerationType.IDENTITY -> uses a user-defined algorithm to generate unique identifier values
+
+** Optimistic Locking	vs Pessimistic Locking
+1. Optimistic Locking:
+	“Trust first, check later”
+	hink: “I assume no one else will change the data.”
+	Multiple users can read the same data at the same time.
+	When someone tries to save, JPA checks if the data has changed (using a @Version field).
+	If it has changed → throw an error (OptimisticLockException).
+
+	example:
+	Two users open a form to edit a product.
+	Both make changes.
+	User A saves → success.
+	User B saves later → fails because data was changed after B read it.
+
+2.Pessimistic Locking:
+	“Lock first, then work”
+	Think: “I’ll lock this data so no one else can touch it.”
+	When one user reads the data, it’s locked in the database.
+	Others must wait to read or update it.
+	Prevents conflicts before they happen.
+
+	👮 Example:
+	User A reads a product for editing.
+	Data is locked. Only row is locked..
+	User B tries to read/update → must wait or gets an error.
+
+| Feature            | Optimistic Locking        | Pessimistic Locking        |
+| ------------------ | ------------------------- | -------------------------- |
+| Locking style      | No lock initially         | Locks DB row immediately   |
+| Conflict detection | On save/commit            | On read                    |
+| Performance        | Faster, scalable          | Slower, more DB load       |
+| Best for           | Low-conflict environments | High-conflict environments |
+| Error thrown       | `OptimisticLockException` | `PessimisticLockException` |
+
+
+** Implement Optimistic locking:
+@Entity
+public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @Version
+    private int version;  // used for optimistic locking.. increment and saves in db every time it modify object
+	
+}
+
+** Implement Pessimistic Locking
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Product p WHERE p.id = :id")
+    Optional<Product> findByIdForUpdate(@Param("id") Long id);
+}
+
+** custom JPA entity listener:
+public class UserListener {
+    @PrePersist
+    public void prePersist(User user) {
+        user.setCreationDate(new Date());
+    }
+}
+@Entity
+@Table(name = "users")
+@EntityListeners(UserListener.class)
+public class User {
+
+
+*** @Inheritance:
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public abstract class Vehicle {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+}
+
+@Entity
+public class Car extends Vehicle {
+    private int wheels;
+}
+
+@Entity
+public class Bike extends Vehicle {
+    private boolean hasCarrier;
+}
+
+| Strategy                 | Description                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `SINGLE_TABLE` (default) | All classes share **one table**. Discriminator column is used to tell type.    |
+| `TABLE_PER_CLASS`        | Each class has its **own table**. No joins, but duplicated columns.            |
+| `JOINED`                 | Normalized: base class & each subclass have **separate tables**, joined by ID. |
