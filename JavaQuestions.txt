@@ -415,7 +415,17 @@ Final:
 final with Variables:
 final int x = 10;
 // x = 20; // ❌ Error: cannot assign a value to final variable
-
+public class DemoClass {
+	final int x; //Either here or on constructor.. But only once..
+	public DemoClass() {
+		x=10;
+	}
+	void test() {
+		final int y;
+		y=0;
+		y=22; // error here
+	}
+}
 final List<String> list = new ArrayList<>();
 list.add("item");   // ✅ allowed
 
@@ -439,6 +449,10 @@ Throws exceptions if you try to modify it.
 | Constructor      | ✅ Can have constructors                     | ❌ Cannot have constructors                          |
 | Access Modifiers | Can be `public`, `protected`, `private`     | Only `public` and `default` methods                 |
 | Use when…        | You want to share common code               | You want to enforce a contract                      |
+
+Valid Access Modifiers in Interface Methods:
+public (default and mandatory for abstract/interface methods)
+private (since Java 9, allowed only for helper methods within the interface)
 
 
 *** abstract class and interfaces cannot be final in Java.
@@ -720,6 +734,14 @@ while (iterator.hasNext()) {
     }
 }
 
+ConcurrentHashMap:
+Thread-Safe?
+✔️ Yes. Multiple threads can access and modify it without explicit synchronization.
+
+Concurrent Modifications Allowed?
+✔️ Yes. It is specifically designed to allow concurrent read and write operations.
+
+
 | Collection Type    | Standard (Fail-Fast)          | ✅ Fail-Safe Alternative                                                                  | Description                                |
 | ------------------ | ----------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------ |
 | **List**           | `ArrayList`                   | `CopyOnWriteArrayList`                                                                   | Snapshot-based list, safe for reads/writes |
@@ -942,13 +964,577 @@ Match GC strategy to application behavior
 | `-Xlog:gc*`                   | GC logging in Java 9+                  |
 
 
-
-
-
-
-Microservice design patterns
-
 Observer vs promise in angular
 
 https://www.geeksforgeeks.org/java-interview-questions/#:~:text=Can%20you%20have-,virtual,-functions%20in%20Java
 	
+Is String thread safe?
+Since a String object cannot be modified after it's created, multiple threads can read it simultaneously without risk of data inconsistency.
+No thread can change the value that another thread is reading — there are no setters or modifying methods in String.
+
+String s = "Hello";
+
+Thread t1 = new Thread(() -> System.out.println(s.toLowerCase()));
+Thread t2 = new Thread(() -> System.out.println(s.toUpperCase()));
+
+t1.start();
+t2.start();
+
+StringBuilder is not thread-safe (mutable, no synchronization).
+StringBuffer is thread-safe (synchronized methods).
+
+*** primitive data types: 8 int, char, boolean, byte, long, float, short, double
+
+| Data Type | Size (in bits)                                                      | Size (in bytes) | Default Value | Range                                    |
+| --------- | ------------------------------------------------------------------- | --------------- | ------------- | ---------------------------------------- |
+| `byte`    | 8 bits                                                              | 1 byte          | `0`           | -128 to 127                              |
+| `short`   | 16 bits                                                             | 2 bytes         | `0`           | -32,768 to 32,767                        |
+| `int`     | 32 bits                                                             | 4 bytes         | `0`           | -2³¹ to 2³¹ - 1 (\~ -2.14B to 2.14B)     |
+| `long`    | 64 bits                                                             | 8 bytes         | `0L`          | -2⁶³ to 2⁶³ - 1                          |
+| `float`   | 32 bits                                                             | 4 bytes         | `0.0f`        | \~±3.4e38 (7 decimal digits precision)   |
+| `double`  | 64 bits                                                             | 8 bytes         | `0.0d`        | \~±1.7e308 (15 decimal digits precision) |
+| `char`    | 16 bits                                                             | 2 bytes         | `'\u0000'`    | 0 to 65,535 (Unicode characters)         |
+| `boolean` | **Not precisely defined** (JVM-specific, typically 1 bit or 1 byte) | -               | `false`       | `true` / `false`                         |
+
+
+int Integer = 24;
+char String  = 'I';
+System.out.print(Integer);
+System.out.print(String);
+
+List<Integer> ints= new ArrayList<>();
+ints.add(Integer);
+
+output-> 24 I // Runs without any error
+
+***
+short x = 10;
+x =  x * 5; //Type mismatch: cannot convert from int to short
+System.out.print(x);
+
+***
+byte x1 = 127;
+x1++;
+x1++;
+System.out.print(x1); // -127  range -128 to 127
+
+***
+int[]  x2 = {120, 200, 016};
+for(int i = 0; i < x2.length; i++){
+         System.out.print(x2[i] + " ");
+}       
+// 120 200 14 octal value of 016 is 14
+
+***
+array is passed to a method, what does the method receive?
+reference of the array is received by the method.
+
+***
+Array Initialization:
+int[] A = {1, 2, 3};
+int[] B = {};
+
+A[0]=12;
+B[0]=12; // Array out of bound exception
+
+***
+System.out.println(3%5); //3
+System.out.println(3/5); //0
+System.out.println(5%5); //0
+
+int[] A = {0,2,4,1,3};
+for(int i = 0; i < A.length; i++){
+	A[i] = A[(A[i] + 3) % A.length];
+}
+
+what is A[1]?
+
+a.length = 5
+A[0] = a[(0 + 3) % 5] = a[3] = 1
+So, a[0] =  a[3] = 1
+A[1] = a[(2 + 3) % 5] = a[0] = 1
+Therefore, a[1] = 1;
+***
+Arrays are objects in java. It is a container that holds a fixed number of items of a single type.
+
+***
+When is the object created with new keyword? 
+The object created with new keyword during run-time.
+***
+String str = "abcde";
+System.out.println(str.substring(1, 3));
+Both are indexes.. second is not length..
+
+***
+String str1 = "Interviewbit".replace('e','s');
+System.out.println(str1); //Intsrviswbit
+
+String str2 = "Interviewbit".replace("e","s");
+System.out.println(str2); //Intsrviswbit
+
+String str3 = "Interviewbit".replaceAll("e","s");  //First is regex
+System.out.println(str3); //Intsrviswbit
+
+String str4 = "Interviewbit".replaceFirst("e","s");
+System.out.println(str4); //Intsrviewbit
+		
+| Method         | Purpose                   | Accepts                    | Behavior                    |
+| -------------- | ------------------------- | -------------------------- | --------------------------- |
+| `replace()`    | Replaces **literal** text | `char` or `String`         | No regex, just direct match |
+| `replaceAll()` | Replaces using **regex**  | `String (regex)`, `String` | Interprets 1st arg as regex |
+
+***
+String a = new String(“Interviewbit”);
+String b = new String(“Interviewbit”);
+Strinc c = “Interviewbit”;
+String d = “Interviewbit”;
+
+How many objects will be created?
+3
+***
+if(1 + 1 + 1 + 1 + 1 == 5){
+  System.out.print(“TRUE”);
+}
+else{
+  System.out.print(“FALSE”);
+}
+
+Output:
+True
+
+***
+System.out.println(Math.floor(3.6));
+3.0
+
+***
+Only public or default allowed at top class level.. Inner classes can be public private protected or default..
+class MethodOverloadingWithNull {
+
+Constructors, methods or fields can have all access specifiers
+
+***
+finalize() method is called before garbage collection.
+
+***
+int i;
+for(i = 1; i < 6; i++){ 
+    if(i > 3) continue;
+}
+System.out.println(i);
+
+Output:
+6
+Since, the loop runs till 6, the value of i is 6.
+
+***
+Which of the following exception is thrown when divided by zero statement is executed?
+ArithmeticException  
+
+***
+What is JDB?
+jdb MyClass
+> stop at MyClass:10
+> run
+> print x
+> step
+> cont
+> quit
+
+***
+abstract class AbstractClass{
+	
+}
+
+will not give any compilation error
+
+***
+Abstract class:
+Abstract class can have constructors, final variables or mathods, or static methods or veriables
+
+***
+
+JDBC type 4 driver,works directly by connecting to the database server through socket connections and 
+converts JDBC calls to vendor-specific database protocols.These drivers don't require any intermediate 
+layer.
+
+***
+
+synchronized method:
+You want to lock the entire method.
+public synchronized void increment() {
+    count++;
+}
+When not ideal:
+If the method is long, or only part of it needs synchronization.
+
+Can cause performance issues by locking more than necessary.
+
+***
+synchronized block:
+
+public void increment() {
+    // some non-critical logic
+    synchronized (this) {
+        count++;
+    }
+    // more non-critical logic
+}
+
+✅ Or, you want to lock on a specific object:
+synchronized (lockObject) {
+    // critical section
+}
+When is this better?
+Only part of the method needs to be synchronized.
+You want to lock on a custom object, not this (to avoid unintended lock contention).
+You're doing multi-lock coordination (e.g., deadlock avoidance).
+
+
+| Feature     | `synchronized` Method             | `synchronized` Block          |
+| ----------- | --------------------------------- | ----------------------------- |
+| Lock target | `this` (or `ClassName.class`)     | Any object                    |
+| Flexibility | Low                               | High                          |
+| Performance | May block entire method           | Can reduce blocking scope     |
+| Use when    | Entire method is critical section | Only part of code is critical |
+
+***
+same lock in multiple blocks:
+only one thread can access methodA or methodB.
+If thread 1 accessssing methodA then other method cant access methodA and methodB.
+
+private final Object lock = new Object();
+
+public void methodA() {
+    synchronized (lock) {
+        System.out.println("Inside A");
+        // long-running task
+    }
+}
+
+public void methodB() {
+    synchronized (lock) {
+        System.out.println("Inside B");
+    }
+}
+
+Its recommended to use different operation for different operation.
+like 
+private final Object readLock = new Object();
+private final Object writeLock = new Object();
+
+***
+ConcurrentHashMap how it manages Consistency?
+
+| Operation       | How It Manages Consistency                                |
+| --------------- | --------------------------------------------------------- |
+| `get(key)`      | Lock-free: Uses **volatile read** (fast, non-blocking)    |
+| `put(key, val)` | Locks only the bucket being modified (not the entire map) |
+| `remove(key)`   | Locks only the affected bin                               |
+
+| Feature           | `HashMap`     | `ConcurrentHashMap`    |
+| ----------------- | ------------- | ---------------------- |
+| Thread-safe?      | ❌ No          | ✅ Yes                  |
+| Locking strategy  | None          | Fine-grained           |
+| Read performance  | Fast (unsafe) | Fast (lock-free)       |
+| Write performance | Unsafe        | Moderate (local locks) |
+| Null keys/values  | ✅ Allowed     | ❌ Not allowed          |
+
+
+| Feature          | `Hashtable`                                  | `ConcurrentHashMap`                                   |
+| ---------------- | -------------------------------------------- | ----------------------------------------------------- |
+| Thread-safe?     | ✅ Yes                                        | ✅ Yes                                                 |
+| Synchronization  | 🔒 **Synchronized** methods (coarse-grained) | 🔐 **Segmented or fine-grained locking** (per bucket) |
+| Lock granularity | Entire object                                | Only affected segment or bucket                       |
+| Read operations  | Blocked if write is ongoing                  | Non-blocking, highly concurrent                       |
+
+| Operation   | `Hashtable`                 | `ConcurrentHashMap`                             |
+| ----------- | --------------------------- | ----------------------------------------------- |
+| Reads       | Slower (due to global lock) | Faster (lock-free reads)                        |
+| Writes      | One thread at a time        | Multiple threads can write to different buckets |
+| Scalability | Poor in multi-threaded apps | Excellent concurrency                           |
+
+
+***
+AtomicInteger:
+A thread-safe way to read and update an integer value
+Without using synchronized blocks or methods
+Using low-level atomic CPU instructions via Compare-And-Swap (CAS)
+
+Why Use It Instead of int or synchronized?
+int + ++ is not atomic (3-step: read, modify, write)
+synchronized makes it atomic, but it’s heavier (locks = slower)
+AtomicInteger provides lock-free, highly-performant atomic operations
+
+***
+Parallel Streams:
+List<String> names = List.of("A", "B", "C", "D");
+
+names.parallelStream().forEach(name -> {
+    System.out.println(Thread.currentThread().getName() + " → " + name);
+});
+
+Good for:
+CPU-bound tasks (e.g., calculations)
+Large collections
+Stateless and independent operations
+
+❌ Avoid if:
+You have I/O-bound operations (e.g., DB, file access)
+Operations are not thread-safe
+You need to preserve order
+
+Important Considerations:
+Uses common ForkJoinPool (shared by entire JVM)
+Overusing parallel streams can cause resource contention
+Avoid in web servers unless you customize the pool
+
+At parallelStream it forks and at terminal operations its join
+
+int sum = list.parallelStream()
+              .filter(n -> n % 2 == 0)
+              .mapToInt(Integer::intValue)
+              .sum();
+			  
+			  
+****
+Virtual Threads in java 19
+
+A lightweight thread managed by the JVM, not the OS.
+You can have millions of virtual threads without overwhelming the system.
+They still appear as Thread objects, but they're not bound to a native OS thread all the time.
+
+
+Thread.startVirtualThread(() -> {
+    // task
+});
+
+| Feature               | Platform Thread (default) | Virtual Thread (Java 21+)       |
+| --------------------- | ------------------------- | ------------------------------- |
+| Backed by OS thread?  | ✅ Yes                     | ❌ No (managed by JVM scheduler) |
+| Memory per thread     | High (\~1 MB stack)       | Very low (uses continuation)    |
+| Blocking              | Blocks OS thread          | Blocks only virtual thread      |
+| Number you can create | Thousands (limited)       | Millions                        |
+
+JVM uses a small pool of platform (carrier) threads — typically based on CPU core count — and 
+efficiently schedules millions of virtual threads on top, using lightweight continuations and 
+cooperative scheduling.
+
+Virtual threads wont give access to other thread untill previous thread blocked
+
+Virtual threads are best for io bound or blocking.
+
+****
+Future in async programming:
+A Future<T> represents the result of an asynchronous computation that may not have completed yet.
+You submit a task, and the Future gives you a handle to that task — letting you:
+| Operation  | Purpose                          |
+| ---------- | -------------------------------- |
+| `get()`    | Wait for and retrieve the result |
+| `isDone()` | Check if the task has finished   |
+| `cancel()` | Cancel the task if needed        |
+
+
+ExecutorService executorService= Executors.newFixedThreadPool(5);
+
+Future<Integer> future=executorService.submit(()->{
+
+			Thread.sleep(500);
+			return 12;
+		});
+
+Integer result=future.get();
+
+Future limitations:
+| Problem                     | Limitation                              |
+| --------------------------- | --------------------------------------- |
+| No callback support         | You must manually poll or block         |
+| No chaining of async tasks  | Can't combine or transform tasks easily |
+| No real non-blocking result | `get()` always blocks unless `isDone()` |
+
+@Async example:
+
+@Service
+public class EmailService {
+
+	//@Async: Marks this method to run in a separate thread
+    @Async
+    public Future<String> sendEmail(String to) {
+        try {
+            Thread.sleep(2000); // Simulate delay
+            return new AsyncResult<>("Email sent to " + to);
+        } catch (InterruptedException e) {
+            return new AsyncResult<>("Failed to send email");
+        }
+    }
+}
+
+in controller:
+@GetMapping("/send")
+    public String sendEmail() throws Exception {
+        Future<String> result = emailService.sendEmail("test@example.com");
+
+        // Do something else...
+
+        return "Async result: " + result.get(); // blocks only if needed
+    }
+
+***
+CompletableFuture
+A CompletableFuture<T> represents a future result of an asynchronous computation.
+
+Unlike Future, it supports:
+✅ Non-blocking
+✅ Callbacks
+✅ Chaining
+✅ Exception handling
+✅ Parallel task composition
+
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    // Simulate some work
+    return "Hello, world!";
+});
+
+String result = future.get(); // blocks
+System.out.println(result);   // Hello, world!
+
+| Feature                | `Future` | `CompletableFuture`         |
+| ---------------------- | -------- | --------------------------- |
+| Blocking `get()`       | ✅ Yes    | ✅ Yes, but also ❌ optional  |
+| Non-blocking callbacks | ❌ No     | ✅ Yes                       |
+| Chaining tasks         | ❌ No     | ✅ Yes (`thenApply()`, etc.) |
+| Exception handling     | ❌ No     | ✅ Yes (`exceptionally()`)   |
+| Combining futures      | ❌ No     | ✅ Yes (`thenCombine()`)     |
+
+Chaining:
+CompletableFuture.supplyAsync(()->{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return "Hello";
+		}).thenApply(message->{
+		
+				return message+", Sandip";
+		}).thenAccept(finalMessage->{
+			System.out.println(finalMessage);
+		});
+
+Exception Handling:
+CompletableFuture.supplyAsync(() -> {
+    if (true) throw new RuntimeException("Oops");
+    return "data";
+}).exceptionally(ex -> {
+    System.out.println("Error: " + ex.getMessage());
+    return "fallback";
+});
+
+Combining:
+CompletableFuture<Integer> price = CompletableFuture.supplyAsync(() -> 100);
+CompletableFuture<Integer> tax = CompletableFuture.supplyAsync(() -> 20);
+
+CompletableFuture<Integer> total = price.thenCombine(tax, Integer::sum);
+System.out.println("Total = " + total.get()); // 120
+
+
+With @Async:
+
+@Async
+    public CompletableFuture<String> generateReport() {
+        try {
+            Thread.sleep(2000); // Simulate delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return CompletableFuture.completedFuture("Report ready!");
+    }
+
+In Controller:
+@GetMapping("/report")
+    public CompletableFuture<ResponseEntity<String>> getReport() {
+        return reportService.generateReport()
+            .thenApply(ResponseEntity::ok);
+    }
+
+***
+Record
+Java 14 as a preview feature and made stable in Java 16.
+It is used to create immutable data carrier classes in a concise way.
+
+Key Features of Java Records:
+Immutable by default – fields cannot be changed after creation.
+Compact syntax – no need to write boilerplate code like constructors, getters, equals(), hashCode(), 
+					and toString() methods.
+Final by design – a record class is implicitly final, so it cannot be extended.
+Used for data modeling – especially in DTOs (Data Transfer Objects), configuration objects, etc.
+
+public record Person(String name, int age) {}
+
+
+This automatically creates a class like:
+final class Person {
+    private final String name;
+    private final int age;
+
+    public Person(String name, int age) { ... }
+    public String name() { return name; }
+    public int age() { return age; }
+
+    @Override
+    public boolean equals(Object o) { ... }
+
+    @Override
+    public int hashCode() { ... }
+
+    @Override
+    public String toString() {
+        return "Person[name=" + name + ", age=" + age + "]";
+    }
+}
+
+**Rules and Restrictions:
+Cannot extend another class (because it implicitly extends java.lang.Record).
+All fields (components) are final.
+Cannot define instance fields other than those in the record header.
+Can implement interfaces.
+
+Advanced examples:
+record Person (String name,int age, Date createdDate) {	
+	public Person {
+        if (age < 0) {
+            throw new IllegalArgumentException("Age cannot be negative");
+        }
+    }
+
+    public String fullTitle() {
+        return name + " by " + age;
+    }
+};
+
+----
+interface Printable {
+    void print();
+}
+
+public record Book(String title, String author) implements Printable {
+    @Override
+    public void print() {
+        System.out.println(title + " by " + author);
+    }
+}
+----
+Cannot Have Instance Fields
+public record Book(String title) {
+    // int count; ❌ Not allowed
+}
+
+----
+Allowed Static Fields or Methods
+public record Book(String title) {
+    public static String CATEGORY = "Education";
+
+    public static void printCategory() {
+        System.out.println(CATEGORY);
+    }
+}
+

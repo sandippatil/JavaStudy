@@ -1,0 +1,18 @@
+Problems faces:
+	Transaction for multiple databases:
+		Atomicos transaction management
+	Decide How to segregate and communicate between services:
+		In begining couldnt decide how to segregate microservices
+	Monitoring and Debugging:
+		Tracking of issue was difficult in new architecture implemented zipkin
+	OpenSessionInView Interceptor:
+	Issue with logging jar: log4j jar with different version
+	
+
+What are the design patterns used in your project?
+Singleton Pattern -> configuration classes, service, repository
+Observer Pattern -> active mq listener and send
+Builder Pattern -> Access aws objects like s3, training job
+Proxy Pattern -> Spring AOP
+Factory pattern -> for sending notifications to different devices
+

@@ -1,0 +1,208 @@
+Display Values:
+
+| Value          | Description                                                      |
+| -------------- | ---------------------------------------------------------------- |
+| `none`         | Hides the element (no layout, no space)                          |
+| `block`        | Element takes full width (e.g., `<div>`)                         |
+| `inline`       | Element flows inline (e.g., `<span>`)                            |
+| `inline-block` | Inline element but with block-like sizing (can set width/height) |
+| `flex`         | Enables Flexbox layout  |
+| `inline-flex`  | Flex layout, but inline |
+| `grid`         | Enables CSS Grid layout |
+| `inline-grid`  | Grid layout, but inline |
+
+| `table`              | Behaves like `<table>`  |
+| `inline-table`       | Like `table` but inline |
+| `table-row`          | Like `<tr>`             |
+| `table-cell`         | Like `<td>`             |
+| `table-row-group`    | Like `<tbody>`          |
+| `table-header-group` | Like `<thead>`          |
+| `table-footer-group` | Like `<tfoot>`          |
+| `table-column`       | Like `<col>`            |
+| `table-column-group` | Like `<colgroup>`       |
+| `table-caption`      | Like `<caption>`        |
+
+***
+display: none vs visibility: none
+
+***
+opacity
+backgroun-color: rgba(120,75,27,0.2)
+
+***
+em unit:
+It scales based on the font-size of the parent element (or the element itself in some cases).
+Meaning of 1em:
+1em = 100% of the current font size
+2em = 200% of the current font size
+0.5em = 50% of the current font size
+
+<div style="font-size: 20px;">
+  Parent (20px)
+  <p style="font-size: 1.5em;">Child (30px)</p>
+</div>
+
+<p style="font-size: 16px; padding: 2em;">
+  This paragraph has 2em padding (32px on all sides)
+</p>
+***
+rem:
+rem stands for “root em”. It is a relative CSS unit, just like em, but instead of inheriting from 
+the parent element, it is based on the root <html> element’s font size.
+
+<!-- Assume html has default font-size: 16px -->
+<p style="font-size: 2rem;">
+  This is 32px text (2 × 16px)
+</p>
+
+***
+Use rem for layout (spacing, padding, margins) and em for component-internal sizing if needed.
+***
+vh and vw are viewport-based units, meaning they scale relative to the visible portion of the browser 
+window.
+
+***
+.full-page {
+  height: 100vh;  /* Takes full height of viewport */
+  width: 100vw;   /* Takes full width */
+}
+
+<div style="height: 50vh; width: 50vw; background: lightblue;">
+  This box is 50% of viewport height and width
+</div>
+***
+positions:
+static: this is default.. top, bottom, left right not work
+| Value      | Description                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| `static`   | Default. Element is in normal flow (no positioning).                                             |
+| `relative` | Positioned **relative to its normal position**.                                                  |
+| `absolute` | Positioned **relative to the nearest positioned ancestor** (`relative`, `absolute`, or `fixed`). |
+| `fixed`    | Positioned **relative to the viewport** (doesn't move on scroll).                                |
+| `sticky`   | Acts like `relative`, then becomes `fixed` when scrolling to a threshold.                        |
+
+<div style="position: fixed; width: 500px; height: 500px; background-color: lightblue; top: 200px; left: 100px;">
+    <div style="width: 80px; height: 100px; background-color: red; right: 20px; position: relative;" ></div>
+    <div style="width: 80px; height: 100px; background-color: blue; right: 20px; position: absolute;" ></div>
+    <div style="width: 80px; height: 100px; background-color: purple; right: 20px; position: fixed;" ></div>
+    <div style="width: 80px; height: 100px; background-color: yellow; right: 20px; position: sticky;" ></div>
+</div>
+
+***
+text-align
+
+display flex property:
+
+flex-direction: row; // row, row-reversed, column, column-reversed
+
+| Value            | Description                                      | Layout Example                   |
+| ---------------- | ------------------------------------------------ | -------------------------------- |
+| `row`            | Default. Items go **left to right** (horizontal) | ➡️ `Item1 Item2 Item3`           |
+| `row-reverse`    | Items go **right to left**                       | ⬅️ `Item3 Item2 Item1`           |
+| `column`         | Items stack **top to bottom** (vertical)         | ⬇️ `Item1`<br>`Item2`<br>`Item3` |
+| `column-reverse` | Items stack **bottom to top**                    | ⬆️ `Item3`<br>`Item2`<br>`Item1` |
+
+
+
+justify-content: flex-start;
+
+| Value                  | Description                                            | Visual Example (row)           |
+| ---------------------- | ------------------------------------------------------ | ------------------------------ |
+| `flex-start` (default) | Items align to the start of the main axis              | `[item][item][item]          ` |
+| `flex-end`             | Items align to the end of the main axis                | `          [item][item][item]` |
+| `center`               | Items are centered along the main axis                 | `     [item][item][item]     ` |
+| `space-between`        | Items have **equal space between**, none at ends       | `[item]   [item]   [item]`     |
+| `space-around`         | Items have **equal space around** (half-space at ends) | `[item]  [item]  [item]`       |
+| `space-evenly`         | Items have **equal space between & at ends**           | `  [item]  [item]  [item]  `   |
+
+
+
+align-items: stretch
+
+| Value                 | Description                                      | Cross Axis Alignment (for `flex-direction: row`)                          |
+| --------------------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
+| `stretch` *(default)* | Items stretch to fill the container’s cross axis | ![Stretch](https://css-tricks.com/wp-content/uploads/2018/10/stretch.svg) |
+| `flex-start`          | Items align to the **start** of the cross axis   | Top aligned                                                               |
+| `flex-end`            | Items align to the **end** of the cross axis     | Bottom aligned                                                            |
+| `center`              | Items are **centered** along the cross axis      | Vertically centered                                                       |
+| `baseline`            | Items align along their **text baseline**        | Aligned based on text lines                                               |
+
+
+flex-wrap: wrap;
+
+| Value          | Description                                                  | Behavior            |
+| -------------- | ------------------------------------------------------------ | ------------------- |
+| `nowrap`       | **(default)** All items stay on one line                     | Overflow if needed  |
+| `wrap`         | Items **wrap to the next line** from top to bottom (LTR)     | Moves to new lines  |
+| `wrap-reverse` | Items wrap to new lines **in reverse order** (bottom to top) | Reverses cross axis |
+
+***
+align-content:
+The align-content property is used in Flexbox and Grid layouts to control the vertical spacing between '
+multiple rows (or columns) inside a container, but only when there is extra space on the cross-axis.
+
+Works **only when there’s multiple lines (i.e., when flex-wrap: wrap is used).
+| Value               | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `stretch` (default) | Stretches lines to fill the container vertically  |
+| `flex-start`        | Packs lines to the top (start of cross-axis)      |
+| `flex-end`          | Packs lines to the bottom                         |
+| `center`            | Centers the lines vertically                      |
+| `space-between`     | Equal vertical space **between** lines            |
+| `space-around`      | Equal space **around** lines (half at top/bottom) |
+| `space-evenly`      | Equal space **between and around** lines          |
+
+***
+align-self:
+The align-self property is used to override the align-items property for a single flex (or grid) item. 
+It controls the cross-axis alignment (usually vertical in flex-direction: row).
+
+| Value        | Description                                             |
+| ------------ | ------------------------------------------------------- |
+| `auto`       | Inherits from `align-items` of the parent (default)     |
+| `flex-start` | Aligns the item to the start of the cross-axis (top)    |
+| `flex-end`   | Aligns the item to the end of the cross-axis (bottom)   |
+| `center`     | Centers the item vertically (or cross-axis)             |
+| `baseline`   | Aligns the item’s text baseline with others             |
+| `stretch`    | Stretches to fill the container (default in many cases) |
+
+***
+flex-shrink
+The flex-shrink property defines how much a flex item is allowed to shrink relative to the rest of the 
+flex items when there isn't enough space in the container.
+| Value | Meaning                                          |
+| ----- | ------------------------------------------------ |
+| `0`   | ❌ **Do not shrink** this item at all             |
+| `1`   | ✅ Shrink as needed (default)                     |
+| `2`+  | Shrink **twice as fast** as items with `1`, etc. |
+
+***
+flex-grow
+The flex-grow property defines how much a flex item will grow relative to other flex items when there's 
+extra space in the flex container.
+| Value | Description                                         |
+| ----- | --------------------------------------------------- |
+| `0`   | ❌ Don't grow (default)                              |
+| `1`   | ✅ Grow to fill available space (relative to others) |
+| `2+`  | Grow **twice, triple, etc.** as much as `1`         |
+
+***
+Media query
+div{
+	background-color: green;
+}
+@media(min-width: 600px) and (max-width: 800px){
+	div{
+		background-color: red;
+	}
+}
+
+***
+transations:
+transition-property: all;
+transition-duration: 2s;
+transition-delay: 1s;
+transition-timing-function: ease-in;
+
+***
+transform:

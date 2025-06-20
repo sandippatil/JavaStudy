@@ -1,0 +1,773 @@
+CHAR vs VARCHAR
+Storage and retrieval have been different for CHAR and VARCHAR.
+Column length is fixed in CHAR but VARCHAR length is variable.
+CHAR is faster than VARCHAR.
+CHAR datatype can hold a maximum of 255 characters while VARCHAR can store up to 4000 characters.
+
+***
+default port : 3306
+
+***
+storage engines:
+engine (or storage engine) is the component responsible for how data is stored, retrieved, 
+and managed in tables
+SHOW ENGINES;
+
+1. InnoDB – Default engine with support for transactions, foreign keys, and crash recovery.
+2. MyISAM – Fast read engine without transaction or foreign key support.
+3. MEMORY – Stores data in RAM for fast access, but loses it on restart.
+4. CSV – Stores table data as comma-separated values in text files.
+5. ARCHIVE – Optimized for high-compression, insert-only data storage.
+6. BLACKHOLE – Accepts data but discards it, useful for replication testing.
+7. FEDERATED – Connects to tables in remote MySQL servers over the network.
+8. NDB (Cluster) – Engine for distributed, high-availability MySQL Cluster setups.
+9. EXAMPLE – A dummy engine for testing or learning, does not store data.
+
+***
+% and _ in the like statement?
+SELECT * FROM Employees WHERE Name LIKE 'J%n';    
+-- Matches names starting with 'J' and ending with 'n', like 'John' or 'Jack'
+
+SELECT * FROM Employees WHERE Name LIKE 'J_n';    
+-- Matches names starting with 'J' and having exactly one character after 'J', like 'Jon'
+
+***
+How many index columns can be created in a table?
+There are 16 indexed columns can be created in a table.
+
+***
+What are string types available for columns?
+SET, BLOB, TEXT, ENUM, CHAR, VARCHAR
+
+***
+CREATE TABLE shirts (
+  size ENUM('small', 'medium', 'large') NOT NULL
+);
+
+INSERT INTO shirts (size) VALUES ('medium');  -- ✅ OK
+INSERT INTO shirts (size) VALUES ('x-large'); -- ⚠️ Inserts '', gives warning
+
+***
+BLOB: Binary Large Object is used to store large amounts of binary data, such as images or files. 
+TINYBLOB, BLOB, MEDIUMBLOB, LONGBLOB
+
+***
+TINYTEXT, TEXT, MEDIUMTEXT, LONGTEXT
+
+***
+REGEXP:
+perform pattern matching with string values.
+SELECT * FROM table_name WHERE column_name REGEXP 'pattern';
+
+***
+add a column in MySQL:
+ALTER TABLE tab_name
+ADD COLUMN col_name col_definition [FIRST|AFTER exist_col];
+
+***
+DROP TABLE table-name;
+
+***
+Second highest:
+SELECT * FROM employee order by salary desc limit 1 offset 1;
+
+Third highest:
+SELECT * FROM employee order by salary desc limit 1 offset 2;
+
+***
+SELECT NOW(); // 2025-06-17 23:34:47
+SELECT CURRENT_DATE(); //2025-06-17
+
+***
+DISTINCT: unique values
+
+***
+CREATE TABLE Employee (
+
+    Employee_Name VARCHAR(128),
+
+    Employee_ID VARCHAR(128),
+
+    Employee_Salary VARCHAR(16),
+
+    Designation CHAR(4)
+
+);
+
+:
+
+INSERT INTO table_name ( field1, field2, field3 )  
+VALUES  ( value1, value2, value3 );  
+
+***
+find duplicate rows In the MySQL table:
+SELECT Table_Name, Category 
+FROM Product
+GROUP BY Name, Category
+HAVING COUNT(id) > 1;
+
+***
+Joins:
+1. INNER JOIN: Returns records that have matching values in both tables.
+SELECT * FROM table1 INNER JOIN table2 ON table1.id = table2.id;
+
+2. LEFT JOIN (or LEFT OUTER JOIN): Returns all records from the left table and matched records from the 
+right table. If there’s no match, NULL values are returned for the right table.
+
+SELECT * FROM table1
+LEFT JOIN table2 ON table1.id = table2.id;
+
+3. RIGHT JOIN (or RIGHT OUTER JOIN): Returns all records from the right table and matched records from 
+the left table. If there’s no match, NULL values are returned for the left table.
+
+SELECT * FROM table1
+RIGHT JOIN table2 ON table1.id = table2.id;
+
+4. FULL JOIN (MySQL does not support FULL JOIN natively): Returns all records when there is a match in 
+either left (table1) or right (table2).
+
+SELECT * FROM table1 LEFT JOIN table2 ON table1.id = table2.id
+UNION
+SELECT * FROM table1 RIGHT JOIN table2 ON table1.id = table2.id;
+
+***
+primary key:
+
+A primary key in MySQL is a single field or a group of fields that are used to uniquely identify each 
+record in a table
+
+***
+primary vs unique key:
+| Feature              | **PRIMARY KEY**                       | **UNIQUE KEY**                            |
+| -------------------- | ------------------------------------- | ----------------------------------------- |
+| **Uniqueness**       | Must be unique                        | Must be unique                            |
+| **Null values**      | ❌ Not allowed (always NOT NULL)       | ✅ Allowed (but only one NULL per column)  |
+| **Number per table** | ❗ Only **one** PRIMARY KEY per table  | ✅ Can have **multiple** UNIQUE keys       |
+| **Default index**    | ✅ Automatically indexed               | ✅ Automatically indexed                   |
+| **Use case**         | Identifies the row uniquely (main ID) | Ensures alternate columns are also unique |
+| **Column behavior**  | Implies NOT NULL                      | Does **not** imply NOT NULL automatically |
+
+CREATE TABLE users (
+  id INT PRIMARY KEY,
+  email VARCHAR(100) UNIQUE,
+  username VARCHAR(50) UNIQUE
+);
+
+***
+composite key:
+A composite key (also called a composite primary key or composite unique key) is a key made up of two or 
+more columns that together uniquely identify a row.
+
+CREATE TABLE enrollments (
+  student_id INT,
+  course_id INT,
+  grade CHAR(1),
+  PRIMARY KEY (student_id, course_id)
+);
+
+
+CREATE TABLE users (
+  id INT PRIMARY KEY,
+  email VARCHAR(100),
+  phone VARCHAR(20),
+  UNIQUE (email, phone)
+);
+
+***
+What is a HEAP Table in MySQL?
+In MySQL, a HEAP table is an in-memory table created using the MEMORY storage engine. These are often 
+called HEAP tables because they store data in RAM, not on disk.
+
+| Feature              | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| **Storage Location** | Data is stored in **RAM** (not persisted to disk)       |
+| **Engine**           | Uses the `MEMORY` engine (was originally called `HEAP`) |
+| **Speed**            | Very fast reads and writes                              |
+| **Volatility**       | ❌ Data is lost on server restart                        |
+| **Indexes**          | Only supports **HASH** and **BTREE** indexes            |
+| **Use Case**         | Temporary lookup tables, caching, session data          |
+
+CREATE TABLE temp_data (
+  id INT PRIMARY KEY,
+  value VARCHAR(100)
+) ENGINE = MEMORY;
+
+***
+Candidate key:
+
+| Feature             | **Primary Key**                                  | **Candidate Key**                                                |
+| ------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| **Definition**      | The **chosen** key to uniquely identify each row | A column (or set of columns) that **can** uniquely identify rows |
+| **Uniqueness**      | ✅ Must be unique                                 | ✅ Must be unique                                                 |
+| **NULL allowed**    | ❌ Not allowed (always `NOT NULL`)                | ❌ Not allowed (must also be `NOT NULL`)                          |
+| **Count per table** | Only **one** primary key                         | Can have **multiple** candidate keys                             |
+| **Purpose**         | Main identifier of a row                         | Potential identifiers — one of which becomes primary             |
+| **Declared with**   | `PRIMARY KEY` constraint                         | `UNIQUE` + `NOT NULL` (but not declared as primary)              |
+
+
+CREATE TABLE users (
+  id INT PRIMARY KEY,   -- candidate key 1
+  email VARCHAR(100) UNIQUE,          -- Allows NULLs by default.. not a candidate key
+  username VARCHAR(50) UNIQUE NOT NULL -- candidate key 2
+);
+
+***
+DELETE vs TRUNCATE
+| Feature                     | `DELETE`                                       | `TRUNCATE`                                                 |
+| --------------------------- | ---------------------------------------------- | ---------------------------------------------------------- |
+| **Purpose**                 | Removes **specific rows** from a table         | Removes **all rows** from a table                          |
+| **WHERE clause**            | ✅ Supported (you can filter rows)              | ❌ Not supported (all rows are removed)                     |
+| **Speed**                   | 🐢 Slower (row-by-row deletion, logs each row) | 🚀 Faster (drops and recreates table internally)           |
+| **Triggers**                | ✅ Fires `DELETE` triggers                      | ❌ Does **not** fire triggers                               |
+| **Auto-increment reset**    | ❌ No (counter stays the same)                  | ✅ Yes (resets auto-increment to 1)                         |
+| **Rollback**                | ✅ Yes (if inside a transaction)                | ✅ Yes (in InnoDB, if supported)                            |
+| **Foreign key constraints** | ✅ Respects and checks                          | ❌ Fails if foreign key constraints exist (unless disabled) |
+| **Transaction safe**        | ✅ Yes (InnoDB)                                 | ⚠️ Not always (depends on engine)                          |
+
+DELETE FROM users WHERE age > 30;     -- Removes only specific rows
+
+TRUNCATE TABLE users;                -- Removes all rows instantly
+
+***
+What is InnoDB?
+A SQL storage database is called InnoDB database. The InnoDB offers ACID transactions, row-level locking,
+ and foreign key support. InnoDB is owned by Oracle Corporation.
+
+***
+| Feature         | `UNION`                                        | `UNION ALL`                                     |
+| --------------- | ---------------------------------------------- | ----------------------------------------------- |
+| **Duplicates**  | ❌ Removes duplicates (returns distinct rows)   | ✅ Keeps all duplicates                          |
+| **Performance** | 🐢 Slower (extra step to eliminate duplicates) | 🚀 Faster (no sorting/deduplication)            |
+| **Use case**    | When you want a clean set of unique results    | When you want full results including duplicates |
+| **Sorting**     | May sort implicitly due to deduplication       | Doesn’t sort unless you use `ORDER BY`          |
+
+SELECT city FROM customers
+UNION
+SELECT city FROM suppliers;
+-- Removes duplicate cities
+
+SELECT city FROM customers
+UNION ALL
+SELECT city FROM suppliers;
+-- Includes duplicate cities if any
+
+***
+timestamp:
+
+| Feature             | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| **Stores**          | Date + Time (`YYYY-MM-DD HH:MM:SS`)                             |
+| **Range**           | `'1970-01-01 00:00:01'` to `'2038-01-19 03:14:07'` (UTC-based)  |
+| **Auto update**     | Can automatically set on `INSERT` and `UPDATE`                  |
+| **Time zone aware** | Stored in **UTC**, converted to your current time zone on fetch |
+| **Format**          | Default: `YYYY-MM-DD HH:MM:SS`                                  |
+
+
+CREATE TABLE logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  event VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+| Feature     | `TIMESTAMP`                       | `DATETIME`                 |
+| ----------- | --------------------------------- | -------------------------- |
+| Time zone   | ✅ Time zone-aware (stored in UTC) | ❌ Not time zone-aware      |
+| Auto update | ✅ Supports automatic updates      | ❌ Must be handled manually |
+| Range       | 1970–2038                         | 1000–9999                  |
+| Storage     | 4 bytes                           | 8 bytes                    |
+
+***
+What is a view?
+A view in MySQL is a virtual table based on the result of a SELECT query. It does not store actual data, 
+but instead presents data from one or more real tables as if it were a table.
+
+| Feature                    | Description                                                   |
+| -------------------------- | ------------------------------------------------------------- |
+| **Virtual table**          | A view behaves like a table, but it doesn't store data itself |
+| **Based on query**         | Defined by a `SELECT` statement on existing table(s)          |
+| **Read-only or updatable** | Some views can be updated, others are read-only               |
+| **Reusability**            | Simplifies complex queries by reusing them as a virtual table |
+
+CREATE VIEW active_users AS
+SELECT user_id, first_name, last_name
+FROM user
+WHERE is_active = 'Y';
+
+
+| Item             | View Behavior                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| **Data storage** | ❌ No data is physically stored in the view                                              |
+| **Definition**   | ✅ Only the SQL query (definition) is stored in the system                               |
+| **Execution**    | ✅ Data is fetched **live** from underlying tables whenever the view is queried          |
+| **Location**     | The view's definition is stored in the `information_schema` and database metadata files |
+
+Advantages of Views (One-liners):
+🔒 Data Security – Restrict access to specific rows/columns without exposing full tables.
+🧠 Simplifies Queries – Wraps complex joins and filters into a simple virtual table.
+🧽 Improves Readability – Makes SQL code cleaner and easier to understand.
+♻️ Reusability – Define once and reuse in multiple queries or reports.
+🛠 Logical Abstraction – Hides the complexity and structure of underlying tables.
+⏱ Real-Time Data – Always reflects the latest data from source tables.
+📐 Schema Independence – Protects applications from changes in table structures.
+🧪 Virtual Table Behavior – Can be queried like a regular table without storing data.
+
+Disadvantages of Views (One-liners):
+🚫 No Data Storage – Views do not store data, so performance may suffer on large datasets.
+⚠️ Limited Updatability – Not all views support INSERT, UPDATE, or DELETE.
+🐌 Slower Performance – Complex views with joins or aggregations can be slower than direct queries.
+🔄 Dependency on Base Tables – Changes in base table structure can break the view.
+📉 No Index Support – Views can’t be indexed directly, which limits optimization.
+🔍 Debugging Complexity – Errors in queries using nested views can be hard to trace.
+📦 Storage Engine Constraints – Some storage engines may not fully support view-related operations.
+🧠 Misuse Risk – Overusing views can lead to confusion and maintenance difficulties.
+
+***
+Can we insert delete update in view?
+You can perform INSERT, UPDATE, and DELETE on a view if:
+The view is based on a single table.
+The view does not use:
+JOIN
+GROUP BY
+DISTINCT
+AGGREGATE FUNCTIONS (like SUM, COUNT)
+UNION
+LIMIT, OFFSET
+The view includes all required NOT NULL columns from the base table.
+
+
+CREATE VIEW simple_view AS
+SELECT id, name FROM users;
+
+UPDATE simple_view SET name = 'John' WHERE id = 1;
+-- ✅ This will work if `users` allows it
+
+You cannot modify a view if:
+It’s based on multiple tables or a join.
+It includes derived/calculated columns.
+It hides required NOT NULL columns with no default.
+
+complex example:
+
+CREATE VIEW employee_sales_summary AS
+SELECT 
+    e.emp_id,
+    e.name AS employee_name,
+    d.department_name,
+    COUNT(s.sale_id) AS total_sales,
+    SUM(s.amount) AS total_amount,
+    AVG(s.amount) AS average_sale,
+    MAX(s.amount) AS max_sale,
+    MIN(s.amount) AS min_sale,
+    YEAR(s.sale_date) AS sale_year
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+JOIN sales s ON e.emp_id = s.emp_id
+GROUP BY e.emp_id, YEAR(s.sale_date);
+
+***
+MyISAM Storage Engine in MySQL:
+
+MyISAM is one of the original storage engines in MySQL, known for fast read performance and simplicity, 
+but it lacks advanced features like transactions and foreign keys.
+
+| Feature              | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| **Speed**            | Very fast for **read-heavy** operations                              |
+| **Storage**          | Stores table structure (`.frm`), data (`.MYD`), and indexes (`.MYI`) |
+| **Locking**          | Uses **table-level locking** (not row-level)                         |
+| **Transactions**     | ❌ No transaction support                                             |
+| **Foreign keys**     | ❌ Not supported                                                      |
+| **Full-text search** | ✅ Supported (before InnoDB supported it)                             |
+| **Auto-repair**      | ✅ Can automatically repair corrupted tables                          |
+| **Null support**     | ✅ Allows `NULL`, but not for indexed columns                         |
+
+CREATE TABLE products (
+  id INT,
+  name VARCHAR(100)
+) ENGINE = MyISAM;
+
+When to Use MyISAM:
+
+✅ Use when:
+You need simple, fast SELECTs
+You don’t need transactions or foreign key constraints
+
+❌ Avoid when:
+You need data integrity, concurrent writes, or crash recovery
+
+MyISAM is not crash-safe — data may be lost or corrupted on power failure.
+InnoDB has replaced MyISAM as the default engine since MySQL 5.5.
+
+***
+MySQL MyISAM Static and MyISAM Dynamic
+ MySQL’s MyISAM storage engine, there are two main types of table row formats: Static and Dynamic. 
+| Feature                 | **MyISAM Static**                                      | **MyISAM Dynamic**                                     |
+| ----------------------- | ------------------------------------------------------ | ------------------------------------------------------ |
+| **Storage Format**      | Fixed-length rows                                      | Variable-length rows                                   |
+| **Used for**            | Tables with only `CHAR`, `NUMERIC`, and `FIXED` fields | Tables with `VARCHAR`, `TEXT`, `BLOB`, etc.            |
+| **Speed**               | 🏎️ Faster for read performance                        | ⚙️ Slightly slower due to parsing variable-length rows |
+| **Wasted Space**        | ❌ More disk space used due to fixed-length padding     | ✅ More space-efficient with variable-length fields     |
+| **Corruption Recovery** | ✅ Easier to recover from crashes or corruption         | ❌ Harder to recover due to pointer-based structure     |
+| **Row Deletion**        | Leaves gaps; uses free space list for reuse            | May cause fragmentation                                |
+| **Fragmentation**       | ❌ Less prone to fragmentation                          | ⚠️ More prone to fragmentation                         |
+| **Repair Speed**        | ✅ Faster with `myisamchk`                              | ❌ Slower with `myisamchk`                              |
+
+***
+InnoDB:
+InnoDB is the default and recommended engine in modern MySQL versions due to its support for 
+transactions, row-level locking, foreign keys, and crash recovery.
+
+***
+| Feature                      | **InnoDB**                | **MyISAM**                   | **MEMORY (HEAP)**           |
+| ---------------------------- | ------------------------- | ---------------------------- | --------------------------- |
+| ✅ **Supports Transactions**  | ✅ Yes                     | ❌ No                         | ❌ No                        |
+| 🔒 **Locking Type**          | Row-level                 | Table-level                  | Table-level                 |
+| 🔐 **Foreign Keys**          | ✅ Supported               | ❌ Not supported              | ❌ Not supported             |
+| ♻️ **Crash Recovery**        | ✅ Yes                     | ❌ No                         | ❌ No (data lost on restart) |
+| 📦 **Storage Location**      | Disk                      | Disk                         | RAM (Memory)                |
+| 🧠 **Best For**              | OLTP, data integrity      | Fast reads, simple workloads | Temp data, fast lookup      |
+| ⚡ **Performance (Reads)**    | Good                      | Excellent                    | Fastest                     |
+| 🚫 **BLOB/TEXT Support**     | ✅ Yes                     | ✅ Yes                        | ❌ No                        |
+| 🧮 **Full-text Index**       | ✅ Yes (since MySQL 5.6)   | ✅ Yes                        | ❌ No                        |
+| 🔁 **AUTO\_INCREMENT Reset** | ❌ No (retains last value) | ✅ Yes (resets on `TRUNCATE`) | ✅ Yes (resets on restart)   |
+| 🧾 **Triggers Support**      | ✅ Yes                     | ❌ No                         | ❌ No                        |
+
+***
+How can we save images in MySQL?
+In MySQL, Blobs can be used to store images. 
+
+If you're using InnoDB, large BLOBs might be stored outside the main table in a separate area 
+(called overflow pages).
+
+***
+What is a Trigger in MySQL?
+A trigger is a set of SQL statements that automatically executes (fires) in response to certain events 
+on a table — like INSERT, UPDATE, or DELETE.
+
+| Feature              | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| **Automatic**        | Executes **automatically**, no need to call manually                |
+| **Events Supported** | `BEFORE` or `AFTER` → `INSERT`, `UPDATE`, `DELETE`                  |
+| **Scope**            | Works at the **row level**, one trigger fires per affected row      |
+| **Use Cases**        | Logging, enforcing rules, auditing, auto-updates, cascading changes |
+
+DELIMITER $$
+
+CREATE TRIGGER after_salary_update
+AFTER UPDATE ON employees
+FOR EACH ROW
+BEGIN
+  IF OLD.salary != NEW.salary THEN
+    INSERT INTO audit_log (emp_id, old_salary, new_salary)
+    VALUES (OLD.id, OLD.salary, NEW.salary);
+  END IF;
+END$$
+
+DELIMITER ;
+
+***
+Indexing:
+An index in MySQL is a data structure that improves the speed of data retrieval on a table, similar to 
+an index in a book — it helps you find rows faster without scanning the entire table.
+
+| Feature               | Description                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| 🎯 **Purpose**        | Speeds up `SELECT`, `WHERE`, `JOIN`, and `ORDER BY` queries           |
+| 🔍 **How it works**   | Creates a sorted lookup structure (like B-trees or hash tables)       |
+| 🧱 **Storage impact** | Takes up extra disk space                                             |
+| 🐢 **Write overhead** | Slows down `INSERT`, `UPDATE`, `DELETE` (because indexes must update) |
+
+
+CREATE INDEX idx_name ON employees(name);
+
+| Type                | Description                                                          |
+| ------------------- | -------------------------------------------------------------------- |
+| **PRIMARY KEY**     | Unique and NOT NULL; only one per table                              |
+| **UNIQUE**          | Ensures all values in a column (or combination) are unique           |
+| **INDEX / KEY**     | Basic index for speeding up lookups                                  |
+| **FULLTEXT**        | Used for full-text search on `CHAR`, `VARCHAR`, or `TEXT` fields     |
+| **SPATIAL**         | Used for geospatial data types (like `POINT`, `GEOMETRY`)            |
+| **Composite Index** | Index on multiple columns (`INDEX(col1, col2)`) for complex searches |
+
+***
+How multi column index works?
+CREATE INDEX idx_name_age ON employees(name, age);
+This creates an index on the name column first, then age second — the order matters.
+
+SELECT * FROM employees WHERE name = 'Bob';
+SELECT * FROM employees WHERE name = 'Bob' AND age = 25;
+
+Index Best Practices:
+
+Index columns used in WHERE, JOIN, ORDER BY, or GROUP BY – Focus on columns that appear frequently in query filters.
+Use composite indexes for multi-column queries – Combine columns into one index if they are often queried together.
+Follow the left-most prefix rule – Composite indexes are only used if queries start from the first indexed column.
+Avoid indexing low-selectivity columns – Skip indexing columns like status or gender with few unique values.
+Don’t over-index the table – Too many indexes slow down INSERT, UPDATE, and DELETE operations.
+Use EXPLAIN to analyze index usage – Check if your indexes are actually being used by queries.
+Use covering indexes for read-heavy queries – Include all columns used in SELECT to avoid reading the table.
+Apply UNIQUE indexes for natural uniqueness – Enforce uniqueness on columns like email or username.
+Avoid indexing large TEXT or BLOB columns – These are space-heavy and slow; use FULLTEXT if needed.
+Regularly analyze and optimize large tables – Run ANALYZE TABLE and OPTIMIZE TABLE to maintain index performance.
+
+***
+How to analyze any query?
+EXPLAIN SELECT * FROM employees WHERE name = 'John';
+| id | select\_type | table     | type | possible\_keys | key       | key\_len | ref   | rows | Extra       |
+| -- | ------------ | --------- | ---- | -------------- | --------- | -------- | ----- | ---- | ----------- |
+| 1  | SIMPLE       | employees | ref  | idx\_name      | idx\_name | 102      | const | 1    | Using where |
+
+***
+Partitioning:
+Partitioning is a database technique where a large table is divided into smaller, manageable parts 
+(called partitions) based on specific rules — but still behaves like one table in queries.
+
+Advantages:
+📉 Faster Queries	Queries can scan only relevant partitions, reducing read time
+📂 Data Management	Easier to manage data (e.g., drop old data partition-by-partition)
+🧮 Improved Maintenance	Makes indexing, backups, and deletes faster on huge tables
+
+CREATE TABLE sales (
+  id INT,
+  sale_date DATE,
+  amount DECIMAL(10,2)
+)
+PARTITION BY RANGE (YEAR(sale_date)) (
+  PARTITION p2019 VALUES LESS THAN (2020),
+  PARTITION p2020 VALUES LESS THAN (2021),
+  PARTITION p2021 VALUES LESS THAN (2022),
+  PARTITION pmax VALUES LESS THAN MAXVALUE
+);
+
+-- 2019 data (goes into partition p2019)
+INSERT INTO sales VALUES (1, '2019-03-10', 100.00);
+INSERT INTO sales VALUES (2, '2019-07-22', 150.00);
+
+-- 2020 data (goes into partition p2020)
+INSERT INTO sales VALUES (3, '2020-01-15', 200.00);
+INSERT INTO sales VALUES (4, '2020-12-05', 175.00);
+
+SELECT 
+  PARTITION_NAME, TABLE_ROWS 
+FROM 
+  INFORMATION_SCHEMA.PARTITIONS 
+WHERE 
+  TABLE_NAME = 'sales';
+
+PARTITION_NAME TABLE_ROWS
+p2019	2
+p2020	2
+p2021	2
+pmax	2
+
+Partition types:
+| Type    | Description                                    | Example                      |
+| ------- | ---------------------------------------------- | ---------------------------- |
+| `RANGE` | Partitions by value ranges                     | `YEAR(date) < 2020`, `<2021` |
+| `LIST`  | Partitions by specific values                  | `IN (1, 2, 3)`               |
+| `HASH`  | Evenly distributes rows using a hash function  | `HASH(id)`                   |
+| `KEY`   | Like `HASH`, but uses MySQL’s internal hashing | `KEY(id)`                    |
+
+Limitations:
+❌ You cannot use FOREIGN KEY with partitioned tables
+❌ Only one partitioning rule per table
+❌ Partition key must be part of every primary key or unique index
+
+When to Use Partitioning:
+✅ Use when:
+You have very large tables (millions of rows)
+You need to frequently query or delete rows based on a date, region, etc.
+You want to improve performance and maintenance
+
+❌ Avoid if:
+Your table is small or moderate in size
+You're using lots of joins and foreign keys
+
+How partitions are saved?
+partitions are not stored as separate physical tables, but the data is split internally within the same 
+table based on your partitioning rule. MySQL manages partitions at the storage engine level (like InnoDB).
+
+How indexing happen in partitioning?
+In a partitioned table, each partition has its own separate index.
+So MySQL creates and maintains indexes independently for each partition.
+
+If partition key not present then also improve performance?
+If the partition key is not used, MySQL has to scan all partitions, which is just as slow (or sometimes 
+slower) than scanning a non-partitioned table.
+
+What is "Partition key must be part of every primary key or unique index"?
+MySQL can’t enforce uniqueness correctly across partitions without it.
+Not allowed:
+CREATE TABLE sales (
+  id INT PRIMARY KEY,
+  sale_date DATE
+)
+PARTITION BY RANGE (YEAR(sale_date));
+
+Correct key:
+CREATE TABLE sales (
+  id INT,
+  sale_date DATE,
+  PRIMARY KEY (id, sale_date)
+)
+PARTITION BY RANGE (YEAR(sale_date));
+
+That means "id" could be same in 2 partitions.
+
+Can query by partition like..
+SELECT * FROM sales PARTITION (p2020);
+
+How to create partitions on existing table?
+MySQL does not support adding partitioning directly to an existing non-partitioned table using ALTER TABLE.
+
+altrenative create new table with partition.
+copy data
+delete old table
+rename new table
+
+
+Partition Pruning:
+SELECT * FROM sales WHERE sale_date = '2020-01-01';
+
+MySQL automatically routes the query to the correct partition (e.g., p2020) using partition pruning.
+This improves performance by avoiding scanning all partitions.
+
+Partition by list:
+CREATE TABLE customers (
+  id INT,
+  country_code CHAR(2),
+  name VARCHAR(100),
+  PRIMARY KEY (id, country_code)
+)
+PARTITION BY LIST COLUMNS(country_code) (
+  PARTITION pIN VALUES IN ('IN'),
+  PARTITION pUS VALUES IN ('US'),
+  PARTITION pUK VALUES IN ('UK'),
+  PARTITION pOTHER VALUES IN (DEFAULT)
+);
+
+HASH Partitioning:
+Distributes rows across partitions evenly using a hash function.
+CREATE TABLE logs (
+  id INT,
+  log_date DATE,
+  message TEXT,
+  PRIMARY KEY (id, log_date)
+)
+PARTITION BY HASH(YEAR(log_date))
+PARTITIONS 4;
+
+KEY Partitioning:
+Like HASH, but uses MySQL's internal hash algorithm. Simpler and less error-prone.
+CREATE TABLE users (
+  id INT,
+  name VARCHAR(100),
+  PRIMARY KEY (id)
+)
+PARTITION BY KEY(id)
+PARTITIONS 3;
+
+
+***
+Function:
+A function in MySQL is a reusable block that takes input and returns a single value, 
+used mostly for calculations and data formatting.
+| Feature              | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| 🎯 **Purpose**       | Returns a single value based on input parameters                    |
+| 📥 **Input**         | Accepts parameters (like variables)                                 |
+| 📤 **Output**        | Always returns **one value**                                        |
+| 🔁 **Reusable**      | Can be called in `SELECT`, `WHERE`, `ORDER BY`, etc.                |
+| 💡 **Deterministic** | Typically performs a **calculation**, not complex data manipulation |
+
+DELIMITER $$
+
+CREATE FUNCTION calculate_tax(amount DECIMAL(10,2))
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+  DECLARE tax_rate DECIMAL(4,2) DEFAULT 0.18;
+  RETURN amount * tax_rate;
+END$$
+
+DELIMITER ;
+
+SELECT calculate_tax(100); -- Output: 18.00
+SELECT id, calculate_tax(total) AS tax FROM orders;
+
+Limitations:
+Can’t use INSERT, UPDATE, DELETE, or transactions inside functions.
+Must be deterministic for indexing (i.e., same output for same input).
+
+
+***
+procedures
+A stored procedure is a named block of SQL statements stored in the database that can be executed with a 
+single call. Unlike functions, procedures can perform multiple operations, including data manipulation 
+(INSERT, UPDATE, DELETE), and don't need to return a value (though they can).
+| Feature                   | Description                                             |
+| ------------------------- | ------------------------------------------------------- |
+| 🔁 **Reusable**           | Write once, use many times                              |
+| 📥📤 **Parameters**       | Supports `IN`, `OUT`, and `INOUT` parameters            |
+| 🧮 **Multi-step logic**   | Can include complex logic: variables, loops, conditions |
+| 🔧 **Data manipulation**  | Can use `INSERT`, `UPDATE`, `DELETE`, `CALL`, etc.      |
+| 🔍 **Not used in SELECT** | Cannot be called within a `SELECT` statement            |
+
+
+DELIMITER $$
+
+CREATE PROCEDURE add_user(IN user_name VARCHAR(100))
+BEGIN
+  INSERT INTO users (name) VALUES (user_name);
+END$$
+
+DELIMITER ;
+
+CALL add_user('Alice');
+
+| Feature          | **Procedure**             | **Function**                       |
+| ---------------- | ------------------------- | ---------------------------------- |
+| Returns a value? | ❌ No (optional via `OUT`) | ✅ Yes (must return a single value) |
+| Used in SQL?     | ❌ Not inside `SELECT`     | ✅ Yes                              |
+| Can modify data? | ✅ Yes                     | ❌ No (read-only logic)             |
+| Parameters       | `IN`, `OUT`, `INOUT`      | Only `IN`                          |
+
+***
+clustered index and a non clustered index
+
+clustered index (primary key):
+A clustered index determines the physical order of data in a table.
+Data is physically stored in the B-tree of the clustered index.
+CREATE TABLE employees (
+  emp_id INT PRIMARY KEY,   -- ✅ Clustered index on emp_id
+  name VARCHAR(50)
+);
+Rows are stored on disk in order of emp_id.
+
+non clustered index (index)
+A non-clustered index is a separate index structure that points to the location of data in the clustered 
+index (or heap in other engines).
+You can create multiple non-clustered indexes on different columns.
+Stores only indexed columns + row pointer.
+Accessing full rows requires an extra lookup via the clustered index (this is called a bookmark lookup).
+CREATE INDEX idx_name ON employees(name);  -- 🔍 Non-clustered index
+
+| Feature              | Clustered Index                           | Non-Clustered Index                      |
+| -------------------- | ----------------------------------------- | ---------------------------------------- |
+| Structure            | Sorts and stores table data physically    | Separate from data, holds row pointer    |
+| Count per table      | Only **one** per table                    | **Many** allowed                         |
+| Speed for PK lookups | Very fast (data is directly stored)       | Slightly slower (extra lookup needed)    |
+| Use case             | Fastest for **range scans, primary keys** | Great for **searching/filtering non-PK** |
+| Example in MySQL     | PRIMARY KEY (InnoDB)                      | `CREATE INDEX ... ON ...`                |
+
+
+***
+validate emails using a single query
+SELECT Email
+FROM Vehicle
+where NOT REGEXP_LIKE(Email, '[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}', 'i');
+
+***
+How to get deadlock in mysql query
+

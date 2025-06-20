@@ -1,0 +1,56 @@
+Collection 
+List, Map 
+
+Intermediate Operator(can occoure multiple times):
+1. filter
+2. map
+3. flatMap
+4. distinct
+5. sorted
+6. peek --> used for debuging purpose, also can all elemants in different List.. .peek(s-> newList.add(s))
+7. limit
+8. skip
+
+
+Terminal operators (at end terminal operator is necessary):
+1. forEach
+2. collect
+3. reduce
+4. allMatch return boolean short circuting operators
+5. anyMatch return boolean
+6. noneMatch return boolean
+7. findFirst
+8. findAny
+9. max
+10. min
+11. toArray
+
+Collectors:
+1. joining
+2. groupingBy
+3. partitioningBy
+4. counting
+5. summarizingInt, summarizingDouble, summarizingLong
+6. mapping
+7. filtering
+8. collectingAndThen
+9. toMap, toConcurrentMap
+11. reducing
+12. flatMapping
+14. teeing
+15. maxBy
+
+
+
+Optional.orThen
+Objects::nonNull
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,232 @@
+1. Logger
+2. Controller advice
+3. Rabit Mq
+4. Exception Controller
+5. Schedular
+6. kubernaties
+7. Hql
+8. zipkin
+9. Custom annotation
+10. JUnit
+11. PoJo validation
+12. logout
+
+move C:\Windows\minikube.exe C:\Windows\System32\
+
+default 
+@SpringBootApplication
+@EnableWebSecurity
+@EnableCaching
+@EnableDiscoveryClient
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@PreAuthorize
+
+@EnableZuulProxy
+@EnableFeignClients
+@Cacheable
+
+@ToString
+@ToString.Exclude
+
+@PropertySource("file:/config/routes.properties")
+@ConfigurationProperties
+
+@EnableJpaAuditing
+@EnableTransactionManagement
+@EnableJpaRepositories(basePackages = "com.crif.credity.db",
+						entityManagerFactoryRef = "tenantEntityManagerFactory",
+						transactionManagerRef = "tenantTransactionManager")
+
+@RestController
+@PropertySource("cbs.properties")
+@PathVariable
+@RequestParam
+@RequestMapping
+@RequestBody
+@GetMapping
+@PostMapping
+@PutMapping
+@DeleteMapping
+
+@RequestHeader
+
+@ConditionalOnBean
+@Aspect
+@Pointcut
+@Around
+@ControllerAdvice
+@ExceptionHandler
+@Order
+
+@Value("${com.crif.api.security.wso2.jwt.trustStore.path}")
+@RefreshScope
+@Controller
+@RestController
+@Service
+@FunctionalInterface
+
+@JsonProperty("CBNumber") 
+
+LocalDate vs Date
+
+
+@FunctionalInterface
+public interface IdentifierAndTypeAndCountry {
+	void apply(CGSearchParams searchParams);
+
+}
+
+@Retention(RUNTIME)
+@Target(TYPE)
+@Import({
+		AccountManagerConfiguration.class
+})
+
+EnableCors
+EnableServiceSecurity
+
+public @interface EnableAccountManager {
+
+}
+
+
+public enum ActionType {
+
+	T(CredityConstant.ACTION_TYPE_TODO),
+	String type;
+
+	private ActionType(String type) {
+		this.type = type;
+	}
+}	
+
+
+Kubernaties:
+minikube start --driver=docker
+minikube status
+kubectl cluster-info
+@FOR /f "tokens=*" %i IN ('minikube -p minikube docker-env --shell cmd') DO @%i
+
+minikube dashboard
+
+::Run in powershell: This command switches your terminal’s Docker CLI to point to Minikube’s internal Docker engine instead of your local (host) Docker.
+minikube docker-env --shell powershell | Invoke-Expression
+
+kubectl create deployment tw-config --image=tw-config:1.0 --port=8889
+
+kubectl get deployment
+
+kubectl describe deployment tw-config
+
+kubectl get pods
+
+kubectl logs tw-config-5477db876b-4s6p6
+
+kubectl expose deployment tw-config --type=NodePort
+
+kubectl rollout restart -n default deployment tw-config
+
+kubectl delete deployment tw-config
+
+docker build . -t tw-all-services:1.0
+
+docker build . -t tw-config:1.0
+docker build . -t tw-user-management:1.0
+docker build . -t tw-api-gateway:1.0
+docker build . -t tw-workflow:1.0
+docker build . -t tw-workflow-engine:1.0
+
+kubectl apply -f ingress.yaml
+kubectl apply -f taskwatch-secrets-config.yaml
+kubectl apply -f db-deployment.yaml
+kubectl apply -f rabbitmq-deployment.yaml
+
+kubectl apply -f tw-config-deployment.yaml
+kubectl apply -f tw-api-gateway-deployment.yaml
+kubectl apply -f tw-user-management-deployment.yaml
+kubectl apply -f tw-workflow-deployment.yaml
+kubectl apply -f tw-workflow-engine-deployment.yaml
+
+### Creates a tunnel or port-forward to expose the service on your local machine (usually localhost or 127.0.0.1).
+minikube service tw-user-management --url
+minikube service tw-workflow --url
+minikube service tw-api-gateway --url
+minikube service tw-ingress --url
+
+mysql -u root -p
+
+kubectl get configmap taskwatch-config -o yaml
+
+Deploy on AWS EKS
+curl.exe -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.32.0/2024-12-20/bin/windows/amd64/kubectl.exe
+eksctl create cluster --name taskwatch-cluster --region us-west-2 --nodes 1 --node-type t2.small
+kubectl get nodes
+
+kubectl get configmap taskwatch-config
+kubectl describe configmap taskwatch-config
+
+eksctl delete cluster --name taskwatch-cluster --region us-west-2
+
+aws eks describe-cluster \
+  --name taskwatch-cluster \
+  --query "cluster.identity.oidc.issuer" \
+  --output text | awk -F'/' '{print $NF}'
+
+7388E4E151DAE45B0FD27425D10C6EAF
+Create role json then run:
+aws iam create-role \
+  --role-name AmazonEKS_EBS_CSI_DriverRole \
+  --assume-role-policy-document file://ebs-csi-trust-policy.json
+  
+aws iam attach-role-policy \
+  --role-name AmazonEKS_EBS_CSI_DriverRole \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+
+aws eks create-addon \
+  --cluster-name taskwatch-cluster \
+  --addon-name aws-ebs-csi-driver \
+  --service-account-role-arn arn:aws:iam::842314427498:role/AmazonEKS_EBS_CSI_DriverRole \
+  --region us-west-2
+
+eksctl utils associate-iam-oidc-provider \
+  --region us-west-2 \
+  --cluster taskwatch-cluster \
+  --approve
+
+aws eks update-nodegroup-config \
+  --cluster-name taskwatch-cluster \
+  --nodegroup-name <your-nodegroup-name> \
+  --scaling-config minSize=1,maxSize=3,desiredSize=2
+  
+Install helm and NGINX Ingress Controller:
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace
+kubectl get svc -n ingress-nginx
+
+# get external url of tw-ingress 
+kubectl get ingress tw-ingress
+
+Advantages of ingress-nginx:
+🧠 ingress-nginx is an actual Ingress Controller implementation using NGINX.
+🌐 Ingress is just a Kubernetes resource (a rule/definition), not a controller.
+Open-source & flexible	Full control over behavior and config
+✅ Built-in Load Balancing	Smart routing to multiple pods
+✅ SSL Termination	Easily add HTTPS via cert-manager or static TLS
+✅ Path-based & host-based routing	Route traffic based on subdomain or URL paths
+✅ Authentication & Rate Limiting	With annotations — protect services quickly
+✅ Rewrite/Redirect support	Use rewrite-target, custom status codes, etc.
+✅ Modular	Can be used with any cloud (EKS, GKE, AKS, on-prem, kind, etc.)
+✅ Supports custom headers	Can inject headers into requests, useful for auth, trace, etc.
+✅ Integrates with Prometheus	Full metrics + monitoring ready
+✅ Supports Let's Encrypt (cert-manager)	Auto TLS certificates!
+
+
+helm upgrade --install fluent-bit fluent/fluent-bit \
+  --namespace logging --create-namespace \
+  --set cloudWatch.enabled=true \
+  --set cloudWatch.logGroupName=/eks/taskwatch-cluster/app-logs \
+  --set awsRegion=us-west-2
+  

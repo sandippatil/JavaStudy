@@ -1,0 +1,43 @@
+ng --version
+
+
+node -v
+v23.11.0
+
+npm -v	
+10.9.2
+
+ng new AngularMaterialTutorial
+✔ Which stylesheet format would you like to use? Sass (SCSS)     [ https://sass-lang.com/documentation/syntax#scss                ]
+✔ Do you want to enable Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering)? yes
+✔ Would you like to use the Server Routing and App Engine APIs (Developer Preview) for this server application? no
+
+
+ng add @angular/material
+
+› Found compatible package version: @angular/material@19.2.18.
+
+? Choose a prebuilt theme name, or "custom" for a custom theme:
+❯ Azure/Blue         [Preview: https://material.angular.dev?theme=azure-blue]
+  Rose/Red           [Preview: https://material.angular.dev?theme=rose-red]
+  Magenta/Violet     [Preview: https://material.angular.dev?theme=magenta-violet]
+  Cyan/Orange        [Preview: https://material.angular.dev?theme=cyan-orange]
+  Custom
+
+Set up global Angular Material typography styles? (y/N) y
+
+After this this will add in angular.js:
+"styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
+              "src/styles.scss"
+            ],
+			
+adds dependencies in package.json:
+"@angular/material": "^19.2.18",
+"@angular/cdk": "^19.2.18",
+
+in index.html:
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+Typography:

@@ -1,0 +1,81 @@
+*** S3 vs EBS In AWS:
+S3 ( Simple Storage Service ) 
+EBS ( Elastic Block storage ) volumes attached to ec2 
+
+EBS:
+| Feature           | Details                                                               |
+| ----------------- | --------------------------------------------------------------------- |
+| **Type**          | Block storage                                                         |
+| **Use Case**      | Provides virtual hard drives to EC2 instances                         |
+| **Access Method** | Mounts as a volume to an EC2 instance (like a disk)                   |
+| **Mountable?**    | ✅ Yes, can be mounted to Linux/Windows OS                             |
+| **Performance**   | High IOPS and low latency (especially with io2 or gp3)                |
+| **Durability**    | 99.999% (less than S3)                                                |
+| **Availability**  | Tied to EC2 availability; supports snapshot backups                   |
+| **Cost**          | More expensive than S3                                                |
+| **Scalability**   | Limited per volume (up to 16 TiB per volume)                          |
+| **Data Access**   | Suitable for applications needing fast and frequent read/write access |
+| **Example Use**   | Databases, file systems, app servers, swap space                      |
+
+*** How Does Auto Scaling Work In AWS::
+with Auto Scaling Groups-> Automatic Scaling -> Create Dynamic Scaling Policies.
+cpu, memory, load balancer request count, custom cloudwatch matric
+
+What Are Key-Pairs In AWS?
+A key pair consists of two types of keys - a public key and a private key. The public key is used to 
+encrypt data and stored on the AWS EC2 instance while a private key is used to decrypt data and is kept 
+by the user. Whenever you want to connect to an AWS EC2 instance a key-pair works as a security 
+credential to prove your secure authentication identity and access to EC2 instance via SSH.
+
+*** What Are The Various Load Balancers Provided By AWS?
+1. Application Load Balancer (ALB):
+| Feature                | Description                                                              |
+| ---------------------- | ------------------------------------------------------------------------ |
+| **Layer**              | 7 (Application Layer)                                                    |
+| **Routing**            | Content-based (URL path, hostname, HTTP headers, methods, query strings) |
+| **Protocol Support**   | HTTP, HTTPS                                                              |
+| **Best for**           | Web applications, microservices, containers (ECS, EKS)                   |
+| **Sticky Sessions**    | ✅ Supported (via cookies)                                                |
+| **WebSocket Support**  | ✅ Supported                                                              |
+| **Host-based Routing** | ✅ Yes (e.g., route based on domain)                                      |
+| **Path-based Routing** | ✅ Yes (e.g., `/images/*` to image server)                                |
+
+2. Network Load Balancer (NLB):
+| Feature                 | Description                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| **Layer**               | 4 (Transport Layer)                                                |
+| **Routing**             | IP-based, port-based                                               |
+| **Protocol Support**    | TCP, UDP, TLS                                                      |
+| **Best for**            | High-performance, low-latency, real-time apps (e.g., gaming, VoIP) |
+| **Millions of req/sec** | ✅ Handles sudden large traffic bursts efficiently                  |
+| **Static IP Support**   | ✅ Yes (can assign Elastic IPs)                                     |
+| **TLS Termination**     | ✅ Supported                                                        |
+
+
+3. Gateway Load Balancer (GWLB)
+| Feature      | Description                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| **Layer**    | 3/4 (Network Layer / Transport Layer)                                                                          |
+| **Routing**  | IP packet-based routing                                                                                        |
+| **Best for** | Deploying, scaling, and managing third-party virtual appliances (e.g., firewalls, intrusion detection systems) |
+| **Combines** | Load balancing + transparent network gateway                                                                   |
+| **Use Case** | Security inspection, packet manipulation, traffic filtering                                                    |
+
+4. Classic Load Balancer (CLB) ❗Legacy:
+| Feature              | Description                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| **Layer**            | 4 and 7 (basic support)                                       |
+| **Protocol Support** | HTTP, HTTPS, TCP, SSL                                         |
+| **Best for**         | Legacy systems (not recommended for new apps)                 |
+| **Limitations**      | No path/host-based routing, no WebSockets, no modern features |
+
+| Scenario                                  | Recommended Load Balancer |
+| ----------------------------------------- | ------------------------- |
+| Web apps with dynamic routing (HTTP)      | **ALB**                   |
+| High-performance TCP or UDP apps          | **NLB**                   |
+| Security appliances (firewall, IDS, etc.) | **GWLB**                  |
+| Legacy apps (simple HTTP/TCP)             | **CLB** *(if required)*   |
+
+*** Amazon RDS:
+database engines such as MySQL, SQL Server, Oracle, PostgreSQL, and MariaDB.
+

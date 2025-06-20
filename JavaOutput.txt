@@ -1,0 +1,707 @@
+***
+public class ExecutionFlow {
+    static {
+        System.out.println("Static Block");
+    }
+
+    {
+        System.out.println("Instance Block");
+    }
+
+    public ExecutionFlow() {
+        System.out.println("Constructor");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Main Method Start");
+        ExecutionFlow obj = new ExecutionFlow();
+        System.out.println("Main Method End");
+    }
+}
+Static Block
+Main Method Start
+Instance Block
+Constructor
+Main Method End
+
+***
+Use of instance block:
+public class DBConnection {
+
+    private String connectionString;
+    private static String environment;
+
+    static {
+        environment = System.getenv("ENV") == null ? "DEV" : System.getenv("ENV");
+        System.out.println("Static Block: Environment set to " + environment);
+    }
+
+    {
+        // Common instance setup logic
+        System.out.println("Instance Block: Initializing DB connection...");
+        if (environment.equals("DEV")) {
+            connectionString = "localhost:5432/devdb";
+        } else {
+            connectionString = "prod-db.company.com:5432/proddb";
+        }
+    }
+
+    public DBConnection() {
+        System.out.println("Constructor: Using default credentials");
+    }
+
+    public DBConnection(String user, String pass) {
+        System.out.println("Constructor: Using user credentials");
+    }
+
+    public void connect() {
+        System.out.println("Connecting to: " + connectionString);
+    }
+
+    public static void main(String[] args) {
+        DBConnection db1 = new DBConnection();
+        db1.connect();
+
+        DBConnection db2 = new DBConnection("admin", "secret");
+        db2.connect();
+    }
+}
+
+***
+public class StringTest {
+    public static void main(String[] args) {
+        String a = "hello";
+        String b = "hello";
+        String c = new String("hello");
+        String d = c.intern();
+
+        System.out.println(a == b);
+        System.out.println(a == c);
+        System.out.println(a == d);
+    }
+}
+String a = "hello";         // stored in String pool
+String b = "hello";         // refers to the same object in the pool as 'a'
+String c = new String("hello"); // creates a new object in the heap
+String d = c.intern();      // returns reference to the string in the pool
+
+***
+Integer a = 127;
+Integer b2 = 127;
+
+Integer c = 128;
+Integer d = 128;
+
+System.out.println(a == b2);         // Line 1
+System.out.println(c == d);         // Line 2
+System.out.println(c.equals(d));    // Line 3
+
+Integer values from -128 to 127 are cached by the JVM (IntegerCache).
+
+
+IntegerCache:
+IntegerCache is an internal optimization in Java that caches Integer objects for values in the range 
+-128 to 127.
+
+
+Performance: Avoids creating new objects for commonly used small integers.
+Memory Optimization: Saves heap space for frequently repeated values (e.g., loop counters, array indexes).
+
+How it works:
+private static class IntegerCache {
+    static final int low = -128;
+    static final int high = 127;
+    static final Integer[] cache;
+
+    static {
+        cache = new Integer[(high - low) + 1];
+        for (int i = low; i <= high; i++) {
+            cache[i + 128] = new Integer(i);
+        }
+    }
+}
+
+***
+There is a no call by reference in java.. Its always call by value.. Example..
+for example 
+modify(Student s3){
+	s3.setName("Sandip");
+	s3= new Student("Jaydeep");
+}
+Student s1= new Student();
+modify(s1)
+
+In this case its like it create copy of reference like Student s2=s1 and calls modify(s2).
+Othewise if it was call value then it could change orininal object to Jaydeep
+
+***
+public class BuilderTest {
+    public static void main(String[] args) {
+        StringBuilder sb = new StringBuilder("A");
+        modify(sb);
+        System.out.println("Result: " + sb.toString());
+    }
+
+    public static void modify(StringBuilder input) {
+        input.append("B");
+        input = new StringBuilder("C"); // Its a local variable
+        input.append("D");
+    }
+}
+Result: AB
+
+****
+class Animal {
+    String name = "Animal";
+
+    String getName() {
+        return name;
+    }
+}
+
+class Dog extends Animal {
+    String name = "Dog";
+
+    @Override
+    String getName() {
+        return name;
+    }
+}
+
+public class TestClass {
+    public static void main(String[] args) {
+        Animal a = new Dog();
+        System.out.println(a.name);        // Line 1
+        System.out.println(a.getName());   // Line 2
+    }
+}
+Animal
+Dog
+
+Its called variable hiding.. you can use super.name in child to get name in parent..
+
+***
+interface Printer {
+    static void staticPrint() {
+        System.out.println("Printer static print");
+    }
+
+    default void defaultPrint() {
+        System.out.println("Printer default print");
+    }
+}
+
+class LaserPrinter implements Printer {
+    public void defaultPrint() {
+        System.out.println("LaserPrinter default print");
+    }
+
+    public static void staticPrint() {
+        System.out.println("LaserPrinter static print");
+    }
+}
+
+public class InterfaceTest {
+    public static void main(String[] args) {
+        Printer p = new LaserPrinter();
+        p.defaultPrint();       // Line 1
+        // p.staticPrint();     // Line 2 — Uncomment this line. What happens?
+        LaserPrinter.staticPrint(); // Line 3
+    }
+}
+
+p.staticPrint();  
+static method staticPrint() in interface Printer cannot be referenced through the interface reference; use interface name instead
+
+
+***
+class Parent {
+    static {
+        System.out.println("Parent static block");
+    }
+
+    {
+        System.out.println("Parent instance block");
+    }
+
+    Parent() {
+        System.out.println("Parent constructor");
+    }
+}
+
+class Child extends Parent {
+    static {
+        System.out.println("Child static block");
+    }
+
+    {
+        System.out.println("Child instance block");
+    }
+
+    Child() {
+        System.out.println("Child constructor");
+    }
+}
+
+public class InitOrderTest {
+    public static void main(String[] args) {
+        Child c = new Child();
+    }
+}
+Parent static block  
+Child static block  
+Parent instance block  
+Parent constructor  
+Child instance block  
+Child constructor
+
+***
+import java.util.HashSet;
+import java.util.Set;
+
+class Product {
+    int id;
+
+    Product(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Product)) return false;
+        return this.id == ((Product) obj).id;
+    }
+}
+
+public class HashSetTest {
+    public static void main(String[] args) {
+        Set<Product> set = new HashSet<>();
+        set.add(new Product(1));
+        set.add(new Product(1));
+
+        System.out.println("Set size: " + set.size());
+    }
+}
+
+Set size: 2
+Because you did not override hashCode().
+equals() → to check content equality.
+hashCode() → to find the bucket.
+
+***
+int id 
+@Override
+public int hashCode() {
+	return Objects.hash(id);
+}
+
+
+***
+Volatile:
+public class VolatileTest {
+    private static boolean running = true;
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(() -> {
+            while (running) {
+                // busy-wait
+            }
+            System.out.println("Thread stopped.");
+        });
+
+        t.start();
+        Thread.sleep(1000);
+        running = false;
+        System.out.println("Main thread set running = false");
+    }
+}
+
+Without volatile:
+The running flag is a shared variable, but not volatile.
+The JVM may cache the value of running in the thread's local memory (CPU cache).
+So Thread t may never see the updated value (false) set by the main thread.
+➡️ Infinite loop → "Thread stopped." may never print.
+
+***
+public class CounterTest {
+    private int count = 0;
+
+    public void increment() {
+        count++;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        CounterTest ct = new CounterTest();
+
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) ct.increment();
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 1000; i++) ct.increment();
+        });
+
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        System.out.println("Final count: " + ct.count);
+    }
+}
+
+Final count: <varies> no garenty
+
+Make-> synchronized mathod
+
+***
+Deadlock::
+class DeadlockTest {
+    private static final Object lock1 = new Object();
+    private static final Object lock2 = new Object();
+
+    public static void main1(String[] args) {
+        Thread t1 = new Thread(() -> {
+            synchronized (lock1) {
+                System.out.println("Thread 1: Holding lock1...");
+
+                try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+                System.out.println("Thread 1: Waiting for lock2...");
+                synchronized (lock2) {
+                    System.out.println("Thread 1: Acquired lock2!");
+                }
+            }
+        });
+
+        Thread t2 = new Thread(() -> {
+            synchronized (lock2) {
+                System.out.println("Thread 2: Holding lock2...");
+
+                try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+                System.out.println("Thread 2: Waiting for lock1...");
+                synchronized (lock1) {
+                    System.out.println("Thread 2: Acquired lock1!");
+                }
+            }
+        });
+
+        t1.start();
+        t2.start();
+    }
+}
+
+To avoid deadlock:
+Ensure all threads acquire locks in the same order:
+synchronized (lock1) {
+    synchronized (lock2) {
+        // Safe: consistent locking order
+    }
+}
+
+***
+public class VarargsOverload {
+
+    public void call(int... values) {
+        System.out.println("Varargs method");
+    }
+
+	public void call(long values) {
+        System.out.println("Long method");
+    }
+	
+    public void call(Integer value) {
+        System.out.println("Integer method");
+    }
+
+    public static void main(String[] args) {
+        VarargsOverload obj = new VarargsOverload();
+        obj.call(5);
+    }
+}
+
+output:
+Long method
+
+Preference:
+| Match Type | Preference |
+| ---------- | ---------- |
+| Exact      | ✅ Highest  |
+| Widening   | ✅          |
+| Boxing     | ✅          |
+| Varargs    | ❌ Least    |
+
+
+***
+🔹 What is Widening in Java?
+Widening is when a smaller primitive type is automatically promoted to a larger primitive type — safely and without data loss.
+| From Type | To Type                                   |
+| --------- | ----------------------------------------- |
+| `byte`    | `short`, `int`, `long`, `float`, `double` |
+| `short`   | `int`, `long`, `float`, `double`          |
+| `char`    | `int`, `long`, `float`, `double`          |
+| `int`     | `long`, `float`, `double`                 |
+| `long`    | `float`, `double`                         |
+| `float`   | `double`                                  |
+
+double d=0L; // dont give error
+
+***
+void call(long x) {
+    System.out.println("long");
+}
+
+void call(double x) {
+    System.out.println("double");
+}
+
+call(5); // int → long (widening) → prints "long"
+
+***
+interface Printable {}
+
+class Document implements Printable {}
+
+class Report extends Document {}
+
+public class OverloadHierarchy {
+
+    public void print(Printable p) {
+        System.out.println("Printable method");
+    }
+
+    public void print(Document d) {
+        System.out.println("Document method");
+    }
+
+    public void print(Object o) {
+        System.out.println("Object method");
+    }
+
+    public static void main(String[] args) {
+        Report report = new Report();
+        OverloadHierarchy oh = new OverloadHierarchy();
+        oh.print(report);
+    }
+}
+
+output:
+Document method
+
+***
+public class ArrayOverloadTest {
+
+    public void print(Object... objs) {
+        System.out.println("Object varargs method");
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {1, 2, 3};
+        ArrayOverloadTest test = new ArrayOverloadTest();
+        test.print(nums);
+    }
+}
+output:
+Object varargs method
+
+int[] is an Object (because arrays are objects)
+So it's treated like:
+print(new Object[] { int[] nums })
+
+Not like:
+print(new Object[] { 1, 2, 3 }) // ❌ not valid
+
+int[] nums = {1, 2, 3};
+test.print(nums);             // ✅ prints: Object varargs method
+test.print((Object) nums);    // ✅ forces boxing as Object
+
+***
+public class GenericsOverload {
+
+    public void process(List<Integer> list) {
+        System.out.println("List of Integer");
+    }
+
+    public void process(List<Number> list) {
+        System.out.println("List of Number");
+    }
+
+    public static void main(String[] args) {
+        GenericsOverload go = new GenericsOverload();
+        List<Integer> intList = Arrays.asList(1, 2, 3);
+        go.process(intList);
+    }
+}
+
+generic type info (<Integer> or <Number>) is removed at compile time.
+after compilation Are seen by the JVM as:
+public void process(List list)
+public void process(List list)
+
+***
+public static void add(List<? extends Number> list) {    	
+    	Integer i= new Integer(22);
+    	Long l= new Long(22);
+    	//list.add(i); // compilation error because if add(new ArrayList<Double>()); you are adding int in double list
+    	//list.add(l); // compilation error
+    	
+    	List<Number> numbers= new ArrayList<Number>();
+    	//List<Number> intNumbers= new ArrayList<Integer>(); //compilation error
+    	list= new ArrayList<Integer>(); //Allowed
+    	numbers.add(11); //No error
+    	numbers.add(i);  //No error
+    	numbers.add(l);  //No error
+}
+
+***
+Integer a = 100;
+Integer b = 100;
+Integer c = 200;
+Integer d = 200;
+
+System.out.println(a == b); // true integer cacheing from -128 to 127 above this gives false
+System.out.println(c == d); // false 
+
+
+***
+
+final String x = "Hello"; // not final
+String a = x + "World";
+String b = "HelloWorld";
+System.out.println(a == b); // true
+
+
+String x = "Hello"; // not final
+String a = x + "World";
+String b = "HelloWorld";
+System.out.println(a == b); // false Now x + "World" is evaluated at runtime 
+						    // So a is a new object in the heap
+
+***
+String s3="san";
+String s4="dip";
+String s5=s3+s4;
+
+String s1="sandip";
+String s2="sandip";
+
+System.out.println(s1==s2); // true
+System.out.println(s1==s5); //false
+
+***
+import java.util.*;
+
+class Product {
+    String id;
+
+    Product(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof Product) {
+            Product other = (Product) obj;
+            return this.id.equals(other.id);
+        }
+        return false;
+    }
+
+    // No hashCode() override!
+}
+
+public class HashSetEqualsTest {
+    public static void main(String[] args) {
+        Set<Product> products = new HashSet<>();
+
+        products.add(new Product("P101"));
+        products.add(new Product("P101"));
+
+        System.out.println("Size: " + products.size());
+    }
+}
+
+Size: 2
+hashCode not implemented
+
+***
+class Key {
+    String id;
+
+    Key(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj instanceof Key) {
+            return this.id.equals(((Key) obj).id);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    public String toString() {
+        return id;
+    }
+}
+
+public class MutableKeyTest {
+    public static void main(String[] args) {
+        Map<Key, String> map = new HashMap<>();
+
+        Key key = new Key("abc");
+        map.put(key, "value");
+
+        System.out.println("Before mutation: " + map.get(key)); // Line 1
+
+        key.id = "xyz"; // mutate key
+
+        System.out.println("After mutation: " + map.get(key)); // Line 2
+    }
+}
+
+Before mutation: value
+After mutation: null
+
+***
+String o= new String("Sandip");
+Map<Object, String> hashMap= new HashMap<>();
+hashMap.put(o, "Value");
+o=null;
+System.out.println(hashMap);
+
+{Sandip=Value}
+So the map holds a strong reference to that String object
+
+***
+EnumMap:
+| Feature           | `HashMap`        | `EnumMap`                            |
+| ----------------- | ---------------- | ------------------------------------ |
+| Key type          | Any object       | **Only enum types**                  |
+| Performance       | Slower for enums | ✅ Very fast (uses array internally)  |
+| Memory efficiency | More overhead    | ✅ Compact (no hashing required)      |
+| Null keys allowed | ✅ Yes            | ❌ No (throws `NullPointerException`) |
+| Ordering          | Unordered        | ✅ Maintains **natural enum order**   |
+
+🔹 How EnumMap Works Internally
+
+Internally uses an array indexed by the ordinal value of enum constants (0, 1, 2, ...)
+So no hashing or collision resolution is needed
+That’s why it’s blazing fast and very memory-efficient
+
+EnumMap<Status, String> taskStatus = new EnumMap<>(Status.class);
+taskStatus.put(Status.NEW, "Not Started");
+taskStatus.put(Status.IN_PROGRESS, "Ongoing");
+taskStatus.put(Status.DONE, "Completed");
+
+System.out.println(taskStatus);
+{NEW=Not Started, IN_PROGRESS=Ongoing, DONE=Completed}

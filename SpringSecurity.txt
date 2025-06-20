@@ -271,6 +271,48 @@ public UserDTO getUser(@PathVariable("userId") Long userId) {
 | Best for complex logic | ✅ Yes                        | ❌ No                     | ❌ No                   |
 
 
+*** UserDetailsService and UserDetails in Spring Security?
 
+UserDetailsService is an interface used for loading user-specific data.
+UserDetails loadUserByUsername();
+The UserDetails object represents the authenticated user, and it contains all the details such as the 
+username, password, authorities (roles) etc.
 
+***
+
+| Feature               | `hasRole()`                               | `hasAuthority()`                         |
+| --------------------- | ----------------------------------------- | ---------------------------------------- |
+| Adds `ROLE_` prefix   | ✅ Yes (`hasRole('Admin')` → `ROLE_Admin`) | ❌ No, you write full string              |
+| Syntax Simpler?       | ✅ Yes                                     | ❌ Slightly more verbose                  |
+| Recommended for roles | ✅ Yes                                     | ❌ Use for custom authorities             |
+| Use for permissions   | ❌ No                                      | ✅ Yes (`hasAuthority('READ_PRIVILEGE')`) |
+
+** What is @PostAuthorize?
+@PostAuthorize is a method-level security annotation in Spring Security.
+It performs authorization checks after the method is executed.
+Often used when the decision depends on the returned object.
+@PostAuthorize("returnObject.id == authentication.name or hasAuthority('ROLE_Admin')")
+@GetMapping("/{id}")
+public User getUserById(@PathVariable String id) {
+    return userService.findById(id);
+}
+
+| Feature                 | `@PreAuthorize`       | `@PostAuthorize`                |
+| ----------------------- | --------------------- | ------------------------------- |
+| Runs **before** method  | ✅ Yes                 | ❌ No                            |
+| Runs **after** method   | ❌ No                  | ✅ Yes                           |
+| Can access return value | ❌ No                  | ✅ Yes (`returnObject`)          |
+| Common use case         | Validate inputs/roles | Validate ownership/return logic |
+
+*** Hashing in Spring Security?
+Storing encrypted password in the database called Password Hashing.
+To convert it into unreadable format, there are so many hashing algorithms like MD4, MD5, 
+Security Hashing Algorithm - SHA (SHA256, SHA128) ETC.
+
+*** Explain potential web application vulnerabilities and how Spring Security mitigates them?
+Spring Security protects against common web application vulnerabilities like:
+SQL injection
+Cross Site Scripting (XSS)
+Cross Site Request Forgery (XSRF)
+Spring Security mitigates them through filters and Content Security Policy.
 
