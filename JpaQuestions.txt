@@ -83,6 +83,15 @@ entity relationship.
 @JoinColumn(name = "user_id") // foreign key in Order table
 private User user;
 
+
+EntityManager:
+| Method   | From                  | Description                                                           |
+| -------- | --------------------- | --------------------------------------------------------------------- |
+| `find()` | `EntityManager` (JPA) | Fetches the entity; returns `null` if not found.                      |
+| `get()`  | `Session` (Hibernate) | Immediately loads entity by primary key; returns `null` if not found. |
+| `load()` | `Session` (Hibernate) | Returns a proxy; throws exception if not found when accessed.         |
+
+
 ** EntityManager.find() and EntityManager.getReference():
 EntityManager.find():
 	Immediately fetches the entity from the database.

@@ -92,6 +92,27 @@ desired outcome. The features of Java Stream are:
 Stream is not a data structure rather it takes input from Collections, Arrays, I/O channels.
 Stream doesn't change the original data structure they only provide the result as per the pipeline methods.
 
+***
+Advantages of stream api:
+1. More Readable & Declarative
+	Stream API allows you to write what you want to do, not how to do it.
+2. Less Boilerplate Code
+	No need to manually create temporary collections or manage iteration.
+	Cleaner chaining of operations like filter, map, sorted, etc.
+3. Easy Parallelization
+	Streams can easily be converted to parallel streams for multi-core performance gains:
+
+4. Immutable & Side-Effect Free
+	Encourages functional programming style:
+	No modification of original data.
+	Reduced bugs due to shared mutable state.
+
+5. Better Abstraction
+Stream API abstracts the iteration mechanism:
+	You focus on the logic (filter, map, etc.)
+	Internally optimized by JVM.
+	
+	
 When to use map and flatMap:
 
 map():used to transform each element of the stream using a function and returns a new stream with 
@@ -330,3 +351,4 @@ It helps in understanding the structure and interactions within a codebase.
 Useful for analyzing dependencies and managing code complexity.
 It can provide insights into potential refactoring or optimizations.
 Typically visualized through diagrams or dependency graphs for easier comprehension.
+

@@ -16,3 +16,12 @@ Builder Pattern -> Access aws objects like s3, training job
 Proxy Pattern -> Spring AOP
 Factory pattern -> for sending notifications to different devices
 
+
+All Versions:
+
+1. Java -> 17
+2. Spring -> 6.0
+3. Spring Boot -> 3.4.3
+4. Node -> 
+5. Angular -> 17
+

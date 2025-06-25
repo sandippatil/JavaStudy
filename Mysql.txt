@@ -229,6 +229,48 @@ DELETE FROM users WHERE age > 30;     -- Removes only specific rows
 TRUNCATE TABLE users;                -- Removes all rows instantly
 
 ***
+ACID properties:
+The ACID properties are a set of four key principles that ensure reliable processing of transactions in a 
+database system. 
+
+1. Atomicity:
+	Definition: All or nothing.
+	A transaction must be fully completed or not executed at all.
+	If one part of the transaction fails, the entire transaction is rolled back.
+	
+	🧾 Example: Transferring money
+	Withdraw from account A
+	Deposit to account B
+	If deposit fails, withdrawal must also be undone.
+2. Consistency:
+	Definition: Database remains in a valid state before and after the transaction.
+	A transaction must transform the database from one valid state to another, maintaining all defined 
+	rules, constraints, and relationships.
+	🧾 Example:
+		You can't add an order referencing a non-existent product ID.
+		Constraints like foreign keys, data types, etc., must be upheld.
+3. Isolation:
+	Definition: Concurrent transactions don't interfere with each other.
+		The results of a transaction are invisible to other transactions until it is committed.
+		
+	🧾 Example:
+		Two users updating the same product inventory:
+			One's update should not affect the other's view until it's committed.
+			Prevents "dirty reads," "non-repeatable reads," etc.
+4. Durability
+	Definition: Once committed, data changes are permanent — even in case of a system crash.
+	The database must ensure that committed data is saved in non-volatile storage.
+	🧾 Example:
+		If a bank transfer is committed and power goes out, the change must still persist after reboot.
+
+| Property        | Description                             | Ensures...                        |
+| --------------- | --------------------------------------- | --------------------------------- |
+| **Atomicity**   | All or nothing                          | No partial updates                |
+| **Consistency** | Valid state before and after            | Data integrity                    |
+| **Isolation**   | No interference from other transactions | Reliable concurrency              |
+| **Durability**  | Committed data survives crashes         | Permanent storage of transactions |
+
+***
 What is InnoDB?
 A SQL storage database is called InnoDB database. The InnoDB offers ACID transactions, row-level locking,
  and foreign key support. InnoDB is owned by Oracle Corporation.
@@ -302,7 +344,7 @@ WHERE is_active = 'Y';
 | **Execution**    | ✅ Data is fetched **live** from underlying tables whenever the view is queried          |
 | **Location**     | The view's definition is stored in the `information_schema` and database metadata files |
 
-Advantages of Views (One-liners):
+Advantages of Views:
 🔒 Data Security – Restrict access to specific rows/columns without exposing full tables.
 🧠 Simplifies Queries – Wraps complex joins and filters into a simple virtual table.
 🧽 Improves Readability – Makes SQL code cleaner and easier to understand.

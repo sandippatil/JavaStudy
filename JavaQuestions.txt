@@ -8,6 +8,9 @@ JVM consists of a few memory storages as mentioned below:
 4. Program Counter Register: stores the address of the Java virtual machine instruction currently being executed.
 5. Native Method Stack: stores all the native methods used in the application.
 
+String Pool: In Java, the String Pool (also known as the interned string pool) is located in the Heap Memory, 
+specifically in a part of the heap dedicated to string internment.
+
 Can @SpringBootApplication elemenated:
 @SpringBootApplication
 // is equivalent to:
@@ -51,6 +54,32 @@ JDK:
 | **JRE**   | JVM + Libraries        | Run Java apps                |
 | **JDK**   | JRE + Compiler & Tools | Develop Java apps            |
 
+***
+Just-In-Time (JIT) compiler:
+The Just-In-Time (JIT) compiler is a part of the Java Virtual Machine (JVM) that improves the 
+performance of Java applications by compiling bytecode into native machine code at runtime.
+
+How It Works:
+Java code → compiled by javac → becomes bytecode (.class file).
+Bytecode is interpreted by the JVM.
+When certain methods are called frequently, the JIT compiler steps in and compiles them to native 
+	machine code.
+Next time those methods run, JVM uses the compiled native code — making execution faster.
+
+
+Benefits of JIT Compiler:
+Faster execution: Native code runs faster than interpreted bytecode.
+Optimization: JIT performs optimizations like inlining, loop unrolling, and dead code elimination.
+Adaptive: JIT can optimize based on actual runtime behavior (profiling).
+
+| Feature     | Description                              |
+| ----------- | ---------------------------------------- |
+| Role        | Compiles bytecode to native machine code |
+| When        | At runtime, for frequently-used methods  |
+| Benefit     | Improves performance significantly       |
+| Part of JVM | Yes, especially in HotSpot (Oracle JVM)  |
+
+***
 
 String litral vs String object:
 
@@ -223,6 +252,34 @@ synchronized(obj) {
 wait()
 wait(long timeout)
 wait(long timeout, int nanos)
+
+public class ProducerConsumer {
+
+	boolean hasData=false;
+	int intData=0;	
+	synchronized void produce(int data) throws InterruptedException {
+		
+		if(hasData) {
+			wait();
+		}
+		intData=data;
+		System.out.println("Produced data:"+intData);
+		hasData=true;
+		notify();
+	}
+	
+	synchronized void consume() throws InterruptedException {
+		
+		if(!hasData) {
+			wait();
+		}
+		
+		System.out.println("Consumed data:"+intData);
+		hasData=false;
+		notify();
+	}
+}
+
 
 | Feature     | `String`        | `StringBuffer`          | `StringBuilder`          |
 | ----------- | --------------- | ----------------------- | ------------------------ |
@@ -822,6 +879,39 @@ Unpredictable: No guarantee when (or if) it will be called.
 Performance issue: GC delays object removal if finalize() is present.
 Safer alternatives: try-with-resources, AutoCloseable, or explicit close() methods.
 
+***
+AutoCloseable interface:
+AutoCloseable interface is used to define resources that need to be closed after use, such as files, 
+streams, sockets, etc.
+public interface AutoCloseable {
+    void close() throws Exception;
+}
+
+class MyResource implements AutoCloseable {
+    public void doSomething() {
+        System.out.println("Doing something...");
+    }
+
+    @Override
+    public void close() {
+        System.out.println("Resource closed.");
+    }
+}
+
+public class AutoCloseableDemo {
+    public static void main(String[] args) {
+        try (MyResource res = new MyResource()) {
+            res.doSomething();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+Doing something...
+Resource closed.
+
+***
 life cycle of the thread:
 New: The thread has been created but has not yet started.
 Runnable: The thread is running, executing its task, or is ready to run if there are no other higher-priority threads.

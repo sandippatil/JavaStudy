@@ -30,6 +30,11 @@ Easy to Maintain: Loose coupling, separation of concerns, and cleaner code struc
 Security: Dedicated security framework, built-in authentication and authorization, and data protection features.
 Large Community Support: Large and active community support, documentation support, etc.
 
+***
+Bean:
+In Spring, a bean is simply an object that is managed by the Spring container.
+
+***
 Explain Inversion of Control(IoC) and types of IoC containers:
 control of managing the dependencies and their injection when required from the application to the
 container/framework, It increases code scalability, maintainability, and easy testing.

@@ -1,0 +1,634 @@
+Angular Interview Questions and Answers
+
+Beginner-Level Questions
+------------------------
+
+1. What is Angular?
+Answer: Angular is a TypeScript-based open-source front-end web application framework developed by Google.
+It is used for building single-page client applications using HTML and TypeScript.
+
+What is typescript
+TypeScript is a superset of JavaScript developed by Microsoft that adds static typing and modern features to JavaScript.
+Key Features of TypeScript:
+a. Static Typing:
+	Helps catch errors at compile time instead of runtime.
+	let age: number = 25; // Type is explicitly declared
+b. Supports Modern JavaScript:
+	Includes all features of ES6+ and compiles down to older JavaScript for browser compatibility.
+c. Object-Oriented Programming Support
+d. Tooling & IDE Support: VS Code. Provides autocomplete, type checking, and refactoring tools.
+
+greet(name: string): string {
+  return "Hello " + name;
+}
+
+2. What is a component in Angular?
+Answer: A component is a building block of Angular applications. It consists of:
+- Template (HTML)
+- Class (TypeScript)
+- Metadata (decorators)
+
+//dashboard.component.ts
+import { Component } from '@angular/core';
+@Component({
+  selector: 'app-dashboard',
+  imports: [],
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
+})
+export class DashboardComponent {
+
+}
+
+What is a Guard in Angular?
+An Angular Guard is used to control access to routes in your application. It decides whether a user 
+can navigate to or away from a route, based on your logic (e.g., authentication, permissions, 
+unsaved changes).
+| Guard Type         | Interface          | Purpose                               |
+| ------------------ | ------------------ | ------------------------------------- |
+| `CanActivate`      | `CanActivate`      | Check if a route can be accessed      |
+| `CanActivateChild` | `CanActivateChild` | Check if child routes can be accessed |
+| `CanDeactivate`    | `CanDeactivate<T>` | Check if navigation away is allowed   |
+| `Resolve`          | `Resolve<T>`       | Pre-fetch data before route loads     |
+| `CanLoad`          | `CanLoad`          | Prevents lazy-loaded module loading   |
+
+ng generate guard loginCheckGuard
+
+export const loginCheckGuard: CanActivateFn = (route, state) => {
+  const token = sessionStorage.getItem('authToken');
+  if (!token) {
+    // If token exists, redirect to home
+    const router = inject(Router);  // 👈 use inject to get Router
+    router.navigate(['/login']);
+    return false;
+  }
+  // If no token, allow to access /login
+  return true;
+};
+
+app-routing.module.ts
+{
+  path: 'dashboard',
+  component: DashboardComponent,
+  canActivate: [AuthGuard]
+}
+
+3. What is data binding?
+Answer: Data binding in Angular is a technique to bind data between the component class and the template. 
+Types include:
+- Interpolation: {{ data }}
+- Property binding: [property]="data"
+- Event binding: (click)="handleClick()"
+- Two-way binding: [(ngModel)]="data"
+
+What is Property Binding in Angular?
+Property binding in Angular is a one-way data binding technique used to bind the value of a 
+component class property to an HTML element property.
+<img [src]="imageUrl" />
+
+
+4. What is a directive?
+Answer: Directives are instructions in the DOM. There are three types:
+- Component directives: Custom components.
+- Structural directives: Change the DOM layout (e.g., *ngIf, *ngFor).
+- Attribute directives: Change the appearance or behavior (e.g., ngClass, ngStyle).
+<ul>
+  <li *ngFor="let name of names">{{ name }}</li>
+</ul>
+<ul>
+	<li *ngfor="let name of names; let i = index">{{i}}{{name}}</li>
+<ul>
+<p [ngClass]="currentClass">This text will be highlighted.</p>
+
+Built-in Structural Directives:
+| Directive           | Description                                                 |
+| ------------------- | ----------------------------------------------------------- |
+| `*ngIf`             | Adds/removes an element based on a condition                |
+| `*ngFor`            | Loops over a list to render multiple elements               |
+| `*ngSwitch`         | Adds/removes elements based on multiple possible conditions |
+| `*ngSwitchCase`     | Defines one case in `ngSwitch`                              |
+| `*ngSwitchDefault`  | Defines the fallback case in `ngSwitch`                     |
+| `*ngTemplateOutlet` | Renders an `<ng-template>` dynamically                      |
+
+Attribute directives:
+| Directive                            | Description                                       |
+| ------------------------------------ | ------------------------------------------------- |
+| `NgClass`                            | Adds/removes CSS classes dynamically              |
+| `NgStyle`                            | Applies inline styles dynamically                 |
+| `NgModel`                            | Two-way data binding in forms                     |
+| `formControl`                        | Binds a reactive `FormControl` to an input        |
+| `formGroup`                          | Binds a reactive `FormGroup` to a form            |
+| `formArrayName`                      | Binds a `FormArray` to a section of the form      |
+| `required`, `minlength`, `maxlength` | Native validators but act as attribute directives |
+| `routerLink`                         | Binds navigation behavior to anchor tags          |
+| `routerLinkActive`                   | Applies classes when a route is active            |
+
+<div [ngClass]="className">Highlight me</div>
+<div [ngClass]="{ 'active': isActive }">Highlight me</div>
+<div [ngClass]="isActive ? 'active' : 'inactive'">
+  Conditional Styling
+</div>
+
+<p [ngStyle]="{ color: 'red', fontWeight: 'bold' }">Styled text</p>
+<a [routerLink]="['/dashboard']">Go to Dashboard</a>
+
+Custom directive:
+ng generate directive highlight
+
+//highlight.directive.ts
+@Directive({
+  selector: '[appHighlight]'
+})
+export class HighlightDirective {
+
+  @Input('appHighlight') highlightColor: string = 'yellow';
+
+  constructor(private el: ElementRef) {}
+
+  @HostListener('mouseenter') onMouseEnter() {
+    this.el.nativeElement.style.backgroundColor = this.highlightColor;
+  }
+
+  @HostListener('mouseleave') onMouseLeave() {
+    this.el.nativeElement.style.backgroundColor = '';
+  }
+  @HostListener('click') onClick() {
+    this.el.nativeElement.style.backgroundColor = "red";
+  }
+}
+
+<p [appHighlight]="'lightblue'">Hover me to see the highlight!</p>
+<p [appHighlight]="'orange'">Hover over me too!</p>
+
+
+5. What is the difference between ngIf and ngFor?
+Answer:
+- *ngIf: Conditionally includes a template based on a boolean.
+- *ngFor: Iterates over a list and creates a template for each item.
+
+Intermediate-Level Questions
+----------------------------
+
+6. What are Angular lifecycle hooks?
+Angular lifecycle hooks are special methods that Angular calls at specific moments in a component or 
+directive's life — from creation to destruction.
+Answer: Lifecycle hooks allow you to tap into key moments in a component's lifecycle:
+- ngOnInit() – Called after the constructor and initialization.
+- ngOnChanges() – Called when input properties change.
+- ngOnDestroy() – Called just before the component is destroyed.
+
+Here’s the typical sequence for a component:
+constructor → ngOnChanges → ngOnInit → ngDoCheck → ngAfterContentInit → 
+ngAfterContentChecked → ngAfterViewInit → ngAfterViewChecked → ngOnDestroy
+
+| Hook                      | When it runs                                           | Common Use Case                         |
+| ------------------------- | ------------------------------------------------------ | --------------------------------------- |
+| `constructor()`           | When the class is instantiated                         | Basic setup (no DOM access)             |
+| `ngOnChanges()`           | When input properties change (`@Input()`)              | Respond to input changes                |
+| `ngOnInit()`              | Once after the first `ngOnChanges()`                   | Fetch data, init logic                  |
+| `ngDoCheck()`             | Runs during every change detection cycle               | Custom change detection                 |
+| `ngAfterContentInit()`    | After projecting external content (`ng-content`)       | Logic on slotted content                |
+| `ngAfterContentChecked()` | After every check of projected content                 | Watch projected content updates         |
+| `ngAfterViewInit()`       | After component's view and child views are initialized | Access template elements (`@ViewChild`) |
+| `ngAfterViewChecked()`    | After every check of component’s view                  | DOM-dependent updates                   |
+| `ngOnDestroy()`           | Just before the component is removed                   | Cleanup: unsubscribe, clear timers      |
+
+ngAfterContentInit is a lifecycle hook that is called after Angular projects external content 
+(passed using <ng-content>) into your component.
+
+
+7. What is a service in Angular?
+Answer: A service is a class used to share data or business logic between components. 
+Services are typically injected into components using Angular's dependency injection system.
+
+8. What is a module in Angular?
+Answer: A module is a container for components, services, directives, etc. Every Angular app has 
+at least one root module (AppModule). Modules help with organization and lazy loading.
+Why Are Modules Important?
+	They help organize code
+	Support lazy loading for performance
+	Enable reusability of components across the app
+	Define scope (what's available where)
+
+ng generate module user --routing
+
+ng generate component user/user-profile
+//user.module.ts
+@NgModule({
+  declarations: [], //You put components, directives, and pipes that belong to this module.
+  imports: [
+    CommonModule //What this module uses from others, SharedModule, AdminModule
+  ]
+})
+export class UserModule { }
+
+| Best Practice         | Benefit                          |
+| --------------------- | -------------------------------- |
+| Feature-based folders | Easier to maintain and navigate  |
+| SharedModule          | Reuse UI components and pipes    |
+| Lazy-loaded modules   | Faster startup performance       |
+| CoreModule            | Keep singleton services app-wide |
+
+
+What is Pipes:
+A Pipe in Angular is a feature used to transform data directly in the template.
+<h1>Purchases from {{ company | titlecase }} on {{ purchasedOn | date }}</h1>
+<p>Total: {{ amount | currency }}</p>
+
+| Category        | Pipes                                 |
+| --------------- | ------------------------------------- |
+| Text Formatting | `uppercase`, `lowercase`, `titlecase` |
+| Date/Time       | `date`                                |
+| Numbers         | `number`, `percent`, `currency`       |
+| Utilities       | `json`, `slice`, `keyvalue`, `async`  |
+| i18n            | `i18nPlural`, `i18nSelect`            |
+
+
+Custom pipes:
+ng generate pipe shared/reverse
+//reverse.pipe.ts
+@Pipe({
+  name: 'reverse'
+})
+export class ReversePipe implements PipeTransform {
+
+  transform(value: string): string {
+    return value.split('').reverse().join('');
+  }  
+}
+
+9. What is the role of HttpClient?
+Answer: HttpClient is a service used to make HTTP requests (GET, POST, PUT, DELETE). 
+It’s part of HttpClientModule and returns observables for reactive programming.
+
+Google chart in angular:
+npm install angular-google-charts
+npm list angular-google-charts
+
+
+Under the Hood how data binding works:
+Angular uses:
+Zone.js to detect changes (e.g. user input, async tasks)
+Change Detection to update the DOM whenever the component’s state changes
+Directives to bind behavior ([ngModel], *ngIf, *ngFor, etc.)
+
+| Package                     | Purpose                                           |
+| --------------------------- | ------------------------------------------------- |
+| `@angular/core`             | Components, bindings, change detection            |
+| `@angular/forms`            | `ngModel`, `FormGroup`, form bindings             |
+| `@angular/compiler`         | Compiles templates to JS                          |
+| `@angular/platform-browser` | Interacts with the real DOM                       |
+| `zone.js`                   | Detects async tasks and triggers change detection |
+
+
+What is ahead-of-time (AOT) and just-in-time (JIT)
+Angular supports two ways of compiling your templates and components:
+| Mode    | Full Name     | When It Happens                 | Use Case    |
+| ------- | ------------- | ------------------------------- | ----------- |
+| **AOT** | Ahead-of-Time | Before app runs (during build)  | Production  |
+| **JIT** | Just-in-Time  | In the browser (when app loads) | Development |
+
+Ahead-of-Time (AOT) Compilation:
+✔️ Templates and TypeScript are compiled into JavaScript before the browser runs the app.
+Key Features:
+Happens at build time
+Generates optimized JS
+Smaller, faster app
+Detects template errors early
+Used by default in Angular production build
+
+ng build --configuration=production
+Uses: @angular/compiler-cli instead of @angular/compiler in the browser
+
+How to Build and Run an Angular App in Production Mode:
+ng build --configuration=production
+This generates an optimized, minified version of your app inside the dist/ folder:
+Angular's build output is just static HTML/CSS/JS — so you need a web server to host it.
+Here are common ways to serve it:
+npm install -g http-server
+http-server dist/your-app-name
+
+
+Just-in-Time (JIT) Compilation:
+Angular compiles HTML templates in the browser at runtime when the app loads.
+Key Features:
+Happens in browser
+Slower startup
+Bigger JS bundle
+Easy for development (hot reload, fast rebuilds)
+Detects template errors at runtime
+
+ng serve   # default uses JIT
+
+
+10. What is routing in Angular?
+Answer: Routing allows navigation between different views or components. It's defined in a RouterModule
+ with routes like:
+const routes: Routes = [
+  { path: 'home', component: HomeComponent },
+  { path: '**', component: NotFoundComponent }
+];
+
+Advanced-Level Questions
+------------------------
+
+11. What is lazy loading in Angular?
+Answer: Lazy loading loads feature modules only when they're needed, reducing the initial load time 
+of the application. It’s implemented using the loadChildren property in routes.
+
+ng generate module admin --route admin --module app.module
+const routes: Routes = [
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./admin/admin.module').then(m => m.AdminModule)
+  }
+];
+
+Difference Between Component and Module:
+| Aspect            | **Component**                                           | **Module**                                                       |
+| ----------------- | ------------------------------------------------------- | ---------------------------------------------------------------- |
+| **Definition**    | A component controls a part of the UI (view).           | A module groups related components, directives, services, etc.   |
+| **Purpose**       | Used to build and control a specific UI section.        | Organizes the application into cohesive blocks of functionality. |
+| **Decorator**     | `@Component()`                                          | `@NgModule()`                                                    |
+| **Contains**      | Template (HTML), Class (logic), CSS                     | Components, directives, pipes, and services                      |
+| **Example Usage** | `<app-header></app-header>` renders a header component. | `AppModule`, `AdminModule`, `UserModule`, etc.                   |
+| **Bootstrap**     | Can’t bootstrap an app directly.                        | Root module (`AppModule`) bootstraps the app.                    |
+| **Reusability**   | Represents a reusable UI element.                       | Can be lazy-loaded and reused as a feature module.               |
+
+How to create component and service:
+ng generate component component-name
+# or shorthand:
+ng g c component-name
+
+ng generate service service-name
+# or shorthand:
+ng g s service-name
+
+| Feature                 | Traditional Component   | Standalone Component       |
+| ----------------------- | ----------------------- | -------------------------- |
+| Requires Module         | ✅ Yes                   | ❌ No                       |
+| `@NgModule` Declaration | ✅ Required              | ❌ Not needed               |
+| Use in Routing          | Only via modules        | Directly as route target   |
+| Introduced In           | Angular 2+              | Angular 14+                |
+| Ideal For               | Large shared components | Small, reusable components |
+
+
+12. What is a reactive form vs. a template-driven form?
+Answer:
+- Reactive Form: More control, scalable, uses FormGroup, FormControl.
+- Template-driven Form: Simpler, uses ngModel, suitable for simple forms.
+
+| Feature        | Reactive Form              | Template-Driven Form          |
+| -------------- | -------------------------- | ----------------------------- |
+| Code Location  | Component class            | HTML Template                 |
+| Syntax Style   | Imperative (code-driven)   | Declarative (template-driven) |
+| Form Creation  | `FormGroup`, `FormControl` | `ngModel`                     |
+| Suitable For   | Complex forms              | Simple forms                  |
+| Unit Testing   | Easier                     | Harder                        |
+| Learning Curve | Steeper                    | Easier                        |
+
+<!-- Reactive Form -->
+export class AppComponent {
+  myForm = new FormGroup({
+    name: new FormControl('', Validators.required),
+    email: new FormControl('')
+  });
+  
+<form [formGroup]="myForm" (ngSubmit)="onSubmit()">
+  <input formControlName="name">
+  <input formControlName="email">
+  <button type="submit">Submit</button>
+</form>
+
+
+<!-- Template-Driven Form -->
+<form #formRef="ngForm" (ngSubmit)="onSubmit(formRef)">
+  <input name="name" [(ngModel)]="name" required>
+  <input name="email" [(ngModel)]="email">
+  <button type="submit">Submit</button>
+</form>
+
+13. What is Change Detection?
+Answer: Angular uses change detection to track changes in data and update the view. 
+It uses Zone.js to trigger detection and uses OnPush strategy to optimize performance.
+
+14. How does Angular handle dependency injection?
+Answer: Angular uses a hierarchical injector system. Services are registered in providers 
+(module, component, or service level) and Angular automatically injects the required dependencies 
+using constructors.
+
+15. What is Ahead-of-Time (AOT) Compilation?
+Answer: AOT compiles Angular templates and components into JavaScript before the browser loads them. 
+This improves performance and catches errors early.
+
+How to Pass Data from Parent to Child in Angular:
+use Input properties with the @Input() decorator in the child.
+
+// child.component.ts
+@Component({
+  selector: 'app-child',
+  template: `<p>Message from parent: {{ message }}</p>`
+})
+export class ChildComponent {
+  @Input() message: string = '';
+}
+
+// parent.component.ts
+@Component({
+  selector: 'app-parent',
+  template: `<app-child [message]="parentMessage"></app-child>`
+})
+export class ParentComponent {
+  parentMessage = 'Hello from Parent!';
+}
+
+Child to parent:
+<!-- child.component.html -->
+<input [(ngModel)]="inputValue" (input)="sendValue()">
+
+// child.component.ts
+@Output() valueChange = new EventEmitter<string>();
+inputValue: string = '';
+
+sendValue() {
+  this.valueChange.emit(this.inputValue);
+}
+
+<!-- parent.component.html -->
+<app-child (valueChange)="onValueChanged($event)"></app-child>
+<p>Value from child: {{ childValue }}</p>
+
+export class ParentComponent {
+  childValue = '';
+
+  onValueChanged(newVal: string) {
+    this.childValue = newVal;
+  }
+}
+
+*How to install any library in angular:
+npm install <library-name> --save
+npm install bootstrap --save
+
+(Optional) Import into angular.json or styles.css / scripts.ts if needed
+If it's a CSS/JS library like Bootstrap or jQuery, you must update angular.json:
+angular.json:
+"styles": [
+  "node_modules/bootstrap/dist/css/bootstrap.min.css"
+],
+"scripts": [
+  "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+]
+(Optional) Import in Code
+import { debounceTime } from 'rxjs/operators';
+You can check the library in your package.json under dependencies.
+
+What are the components of angular
+1. Module
+2. Component
+3. Services
+4. Directive
+5. Pipe
+6. Routing
+7. Forms
+8. Dependency Injection
+9. Template
+
+App Structure:
+src/
+├── app/
+│   ├── core/                     ← Core services (auth, interceptors, guards)
+│   ├── shared/                   ← Shared components/pipes/directives
+│   ├── home/
+│   │   ├── home.component.ts
+│   │   ├── home.component.html
+│   │   └── home.module.ts       ← Feature module
+│   ├── user/
+│   │   ├── user.module.ts
+│   │   ├── user-routing.module.ts
+│   │   ├── user-list/
+│   │   ├── user-detail/
+│   ├── admin/
+│   │   ├── admin.module.ts
+│   │   └── admin-dashboard/
+│   ├── app-routing.module.ts
+│   └── app.component.ts
+├── assets/
+├── environments/
+├── main.ts
+
+What is <app-root></app-root>:
+<app-root> is the custom HTML tag (a.k.a. component selector) that tells Angular where to load and render your main root component.
+
+What is <router-outlet></router-outlet> in Angular?
+<router-outlet> is a built-in Angular directive (not a regular HTML tag).
+It acts as a placeholder that Angular dynamically replaces with the routed component based on the current URL.
+
+Difference between component and directive
+A directive adds behavior to existing DOM elements. There are two types:
+1) Attribute Directive -> ngClass, ngStyle
+b) Structural Directive -> *ngIf, *ngFor
+
+What is NgRx:
+NgRx (short for Angular Reactive Extensions) is a state management library for Angular apps.
+It helps you manage complex application state using a pattern similar to Redux (from React world), powered by RxJS (Reactive programming).
+
+Why Use NgRx?
+Angular apps grow → state becomes hard to track.
+Data flows between many components and services.
+NgRx centralizes state, making it:
+Predictable
+Traceable (with DevTools)
+Testable
+Scalable
+
+| Concept      | Description                                                      |
+| ------------ | ---------------------------------------------------------------- |
+| **Store**    | Global container holding all state                               |
+| **Action**   | Events that describe what happened (`LOGIN`, `LOAD_USERS`, etc.) |
+| **Reducer**  | Pure function to update state based on action                    |
+| **Effect**   | Handles side-effects (like API calls) using RxJS                 |
+| **Selector** | Efficient way to read state from the store                       |
+| **Dispatch** | Sends an action to the store                                     |
+
+
+@ViewChild
+In Angular, @ViewChild() is a decorator that allows you to access a child component, directive, or DOM element 
+from your component class.
+
+It gives you a reference to:
+A component (child)
+A directive
+A template variable (#templateRef)
+A DOM element
+
+
+@ViewChild(ChildComponent) childComp!: ChildComponent;
+
+Or with a template reference variable:
+<input #myInput>
+@ViewChild('myInput') inputRef!: ElementRef;
+
+Accessing a DOM element:
+<input #inputBox type="text">
+<button (click)="logInput()">Log Input</button>
+
+@ViewChild('inputBox') inputBoxRef!: ElementRef;
+
+logInput() {
+  console.log(this.inputBoxRef.nativeElement.value);
+}
+
+Accessing a Child Component:
+<app-child #child></app-child>
+<button (click)="callChildMethod()">Call</button>
+
+@ViewChild('child') childComp!: ChildComponent;
+
+callChildMethod() {
+  this.childComp.someMethod();
+}
+
+The @ViewChild reference becomes available after the view is initialized, so use it inside ngAfterViewInit().
+
+
+How to communicate between 2 unrelated components:
+using a shared service with RxJS Subjects or Observables.
+@Injectable({ providedIn: 'root' })
+export class SharedService {
+  private messageSource = new BehaviorSubject<string>('Initial Message');
+  currentMessage$ = this.messageSource.asObservable();
+
+  changeMessage(message: string) {
+    this.messageSource.next(message);
+  }
+}
+ 
+// component-a.component.ts
+
+@Component({
+  selector: 'app-component-a',
+  template: `<button (click)="sendMessage()">Send Message</button>`
+})
+export class ComponentA {
+  constructor(private sharedService: SharedService) {}
+
+  sendMessage() {
+    this.sharedService.changeMessage('Hello from Component A!');
+  }
+}
+
+@Component({
+  selector: 'app-component-b',
+  template: `<p>Received: {{ message }}</p>`
+})
+export class ComponentB implements OnInit {
+  message: string;
+
+  constructor(private sharedService: SharedService) {}
+
+  ngOnInit() {
+    this.sharedService.currentMessage$.subscribe(msg => this.message = msg);
+  }
+}

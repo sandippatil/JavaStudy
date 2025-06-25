@@ -18,6 +18,12 @@ EBS:
 | **Example Use**   | Databases, file systems, app servers, swap space                      |
 
 *** How Does Auto Scaling Work In AWS::
+Auto Scaling is like having an intelligent traffic manager for your application. It automatically adjusts 
+the number of EC2 instances running your application based on real-time traffic demands and predefined 
+policies. For instance, during the high traffic periods, Auto Scaling adds instances , improving optimal 
+performance as per the policies configuration. Conversely, while during low traffic, it will reduce the 
+number of instances , optimizes the cost efficiency maintaining high availability.
+
 with Auto Scaling Groups-> Automatic Scaling -> Create Dynamic Scaling Policies.
 cpu, memory, load balancer request count, custom cloudwatch matric
 
@@ -78,4 +84,31 @@ credential to prove your secure authentication identity and access to EC2 instan
 
 *** Amazon RDS:
 database engines such as MySQL, SQL Server, Oracle, PostgreSQL, and MariaDB.
+
+***
+Key Components Of AWS:
+1. EC2 (Elastic Compute Cloud)
+2. S3 (Simple Storage Service)
+3. RDS (Relational Database Service)
+4. IAM (Identity and Access Management)
+
+***
+ What Is An EC2 Instance And How Does It Work?
+An EC2 instance is essentially a virtual server running in the AWS cloud. When you "launch" an EC2 
+instance, you're setting up a virtual machine with the operating system and software stack you've 
+selected (e.g., a Linux server with Apache).
+
+***
+How Is Data Transfer Handled In AWS?
+The data transfer in AWS happens in between regions, within regions, and between the services. 
+It is essential to consider that these data transfer comes with costs when designing the architectures. 
+For example, transfer of the data between an EC2 instance and an S3 bucket within the same region is 
+often free, but the transfer of data in between inter-region comes with charges.
+
+***
+
+
+
+
+
 
