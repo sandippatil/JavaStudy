@@ -1,0 +1,138 @@
+API Gateway:
+Spring Cloud API Gateway is a gateway service built on top of the Spring ecosystem that provides a single 
+entry point for all your microservices. It acts as a reverse proxy and handles routing, monitoring, 
+resiliency, and security for requests going to backend services.
+
+Routing: It forwards client requests to the appropriate microservice based on defined rules (e.g., path, 
+			host, query params).
+Load Balancing: Integrates with service discovery (Eureka, Consul) to route to available service instances.
+Cross-Cutting Concerns: Provides filters to handle tasks like authentication, authorization, logging, 
+			metrics, retries, and rate limiting at the gateway level.
+Security: Supports integration with OAuth2, JWT, and other authentication mechanisms.
+Resiliency: Can implement circuit breakers, retries, and fallback logic to handle failures gracefully.
+Scalability: Since clients don’t talk to microservices directly, scaling and managing services behind the gateway is easier.
+
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://USER-SERVICE   # 'lb://' = load-balanced via Eureka/Consul
+          predicates:
+            - Path=/user/**
+          filters:
+            - AddRequestHeader=X-Request-Source, Gateway
+
+        - id: order-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/order/**
+          filters:
+            - RewritePath=/order/(?<segment>.*), /${segment}
+
+When you write lb://USER-SERVICE in Spring Cloud Gateway, you are telling the gateway:
+“Don’t send this request to a fixed URL — instead, look up the service name USER-SERVICE in the service 
+registry and load-balance across its instances.”
+
+
+In case of kubernaties:
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://user-service.default.svc.cluster.local:80
+          predicates:
+            - Path=/user/**
+
+provide service url, kubernaties service handles load balancing.
+
+**************************
+Retry in api gateway:
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/user/**
+          filters:
+            - name: Retry
+              args:
+                retries: 3                # how many times to retry
+                statuses: BAD_GATEWAY, GATEWAY_TIMEOUT, INTERNAL_SERVER_ERROR
+                methods: GET, POST        # which HTTP methods are eligible
+                exceptions:
+                  - java.io.IOException
+                  - org.springframework.web.client.HttpServerErrorException
+
+**********************
+Rate limit:
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+</dependency>
+
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/user/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5    # 5 requests per second
+                redis-rate-limiter.burstCapacity: 10   # allow short bursts
+                key-resolver: "#{@ipKeyResolver}"      # use our bean
+
+📦 Built-in Gateway Filters
+
+Spring Cloud Gateway comes with a big set of built-in filters.
+Some of the most used ones:
+
+| Filter Name                   | What it does                                          |
+| ----------------------------- | ----------------------------------------------------- |
+| **AddRequestHeader**          | Adds a header to the request                          |
+| **AddResponseHeader**         | Adds a header to the response                         |
+| **RemoveRequestHeader**       | Removes a request header                              |
+| **RewritePath**               | Rewrite part of the URL path (regex supported)        |
+| **SetPath**                   | Replace entire path                                   |
+| **PrefixPath**                | Add a prefix to the path                              |
+| **RequestRateLimiter**        | Apply rate limiting (needs Redis + KeyResolver)       |
+| **Retry**                     | Retry failed requests (configurable on status/method) |
+| **CircuitBreaker**            | Integrates with Resilience4j for fault tolerance      |
+| **RequestHeaderToRequestUri** | Use a header value as the request URI                 |
+| **SecureHeaders**             | Add standard security headers (XSS, CSP, etc.)        |
+| **RemoveResponseHeader**      | Remove a response header                              |
+| **ModifyRequestBody**         | Modify request body before sending downstream         |
+| **ModifyResponseBody**        | Modify response body before sending back              |
+
+*************
+Steps to Secure Gateway with SSL:
+Generate or Obtain a Certificate:
+keytool -genkeypair -alias gateway-ssl \
+  -keyalg RSA -keysize 2048 -validity 365 \
+  -keystore gateway-keystore.p12 \
+  -storeType PKCS12 \
+  -storepass changeit
+
+2. Place Keystore in Project
+Put gateway-keystore.p12 under src/main/resources/.
+
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-store: classpath:gateway-keystore.p12
+    key-store-password: changeit
+    key-store-type: PKCS12
+    key-alias: gateway-ssl

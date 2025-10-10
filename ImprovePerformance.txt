@@ -1,0 +1,218 @@
+how to improve performance from db side:
+
+1. Query Optimization:
+	Use EXPLAIN/EXPLAIN ANALYZE (PostgreSQL, MySQL, etc.) to understand query execution plans.
+
+	Avoid SELECT * — fetch only the columns you need.
+	Batch queries instead of making multiple round trips.
+	Use proper filtering & WHERE clauses to reduce unnecessary row scans.
+	Avoid N+1 queries by using JOINs or bulk fetching.
+
+2. Indexing
+	Add indexes on frequently queried columns (especially in WHERE, JOIN, ORDER BY, GROUP BY).
+	Use covering indexes to avoid fetching rows.
+	Use composite indexes if queries filter on multiple columns.
+	Regularly analyze and rebuild indexes if fragmentation occurs.
+
+3. Schema & Data Design
+	Normalization: Remove redundancy to reduce storage and anomalies.	
+	Partitioning: Split large tables (by range, list, hash) to improve query speed.
+	Sharding: For very large datasets, distribute across multiple servers.
+
+4. Caching & Materialization
+	Use caching (e.g., Redis, Memcached) for frequently accessed queries.
+	Materialized views (PostgreSQL, Oracle) to pre-compute expensive queries.
+	Query results cache at the application or DB level.
+
+5. Connection & Transactions:
+	Use connection pooling to reduce overhead.
+	Keep transactions short to avoid locks.
+	Optimize isolation levels to balance consistency and performance.
+
+6. Hardware & Configuration
+	Allocate sufficient RAM (for caching, buffer pools).
+	Use faster storage (SSD/NVMe).
+	Tune DB parameters (work_mem, shared_buffers, innodb_buffer_pool_size, etc.).
+	Enable parallel query execution if supported.
+	
+	
+***************
+What is N+1 problem explain with example in jpa?
+
+The N+1 query problem happens when:
+You run 1 query to fetch a list of entities.
+Then, for each entity in the list (N entities), an additional query is executed to fetch related data.
+This leads to N+1 queries instead of a single optimized query with a join.
+This problem usually occurs with lazy loading of relationships in JPA/Hibernate.
+
+@Entity
+public class Department {
+    @Id
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    private List<Employee> employees;
+}
+
+List<Department> departments = entityManager
+        .createQuery("SELECT d FROM Department d", Department.class)
+        .getResultList();
+
+for (Department d : departments) {
+    System.out.println(d.getEmployees().size());
+}
+
+Solution:
+List<Department> departments = entityManager
+     .createQuery("SELECT d FROM Department d JOIN FETCH d.employees", Department.class)
+     .getResultList();
+	 
+Or:
+
+@EntityGraph(attributePaths = "employees")
+@Query("SELECT d FROM Department d")
+List<Department> findAllWithEmployees();
+
+***************
+What is Materialized views?
+
+A materialized view (MV) is like a cached result of a SQL query that is stored physically in the database 
+(unlike a normal view which is just a saved query).
+
+Think of it as a pre-computed table generated from a query.
+It improves performance for complex or expensive queries (like joins, aggregations, etc.), because instead 
+of recalculating every time, the DB can directly fetch results from the stored MV.
+
+
+CREATE MATERIALIZED VIEW employee_summary_mv AS
+SELECT department_id, COUNT(*) AS emp_count
+FROM employee
+GROUP BY department_id;
+
+Refreshing Materialized Views
+Since data in a MV can get outdated, you must refresh it
+
+REFRESH MATERIALIZED VIEW employee_summary_mv;
+
+MySQL does not natively support materialized views (as Oracle or PostgreSQL do).
+
+| Feature           | Normal View                  | Materialized View              |
+| ----------------- | ---------------------------- | ------------------------------ |
+| Storage           | No (just a query definition) | Yes (results stored on disk)   |
+| Performance       | Executes query every time    | Reads pre-computed data (fast) |
+| Freshness of data | Always up-to-date            | May be stale (needs refresh)   |
+| Use case          | Lightweight abstractions     | Heavy queries, reporting, BI   |
+
+
+**************
+db isolation levels?
+
+| Isolation Level  | Dirty Read | Non-Repeatable Read | Phantom Read |
+| ---------------- | ---------- | ------------------- | ------------ |
+| Read Uncommitted | ✅ Possible | ✅ Possible          | ✅ Possible   |
+| Read Committed   | ❌ No       | ✅ Possible          | ✅ Possible   |
+| Repeatable Read  | ❌ No       | ❌ No                | ✅ Possible   |
+| Serializable     | ❌ No       | ❌ No                | ❌ No         |
+
+
+
+
+
+
+
+*******************
+What is Memory Leakage?
+
+In Java, memory is managed by the Garbage Collector (GC).
+Normally, GC frees memory of objects that are no longer reachable.
+Memory leak happens when an application holds references to objects that are no longer needed, 
+preventing GC from reclaiming that memory.
+
+Result: Heap keeps growing → eventually causes OutOfMemoryError.
+
+
+public class MemoryLeakExample {
+    private static List<String> cache = new ArrayList<>();
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 1000000; i++) {
+            cache.add("Item " + i);
+        }
+        System.out.println("Added a million items!");
+    }
+}
+
+Common Causes of Memory Leaks in Java
+
+1. Static references: Objects referenced by static fields never get garbage collected.
+2. Unclosed resources: Streams, sockets, database connections not closed → memory/resources leak.
+			Use try-with-resources to fix.
+
+3. Listeners / Callbacks not removed
+	Example: registering an event listener but never deregistering it.
+
+4. Inner classes / Anonymous classes
+	Inner classes hold an implicit reference to the outer class → may prevent GC.
+
+5. Caches with no eviction
+	Keeping everything in memory without cleanup.
+	Fix → Use WeakHashMap, LRU cache, etc.
+
+
+How to Detect Memory Leaks?
+
+Profiling tools:
+	VisualVM
+	Eclipse MAT (Memory Analyzer Tool)
+	JProfiler
+	YourKit
+
+Look for:
+	Heap usage increasing continuously.
+	Objects accumulating without being freed.
+
+How to Prevent Memory Leaks?
+	Always close resources (use try-with-resources).
+	Use WeakReference or WeakHashMap for caches.
+	Deregister listeners/observers when not needed.
+	Be careful with static fields.
+	Use profiling tools in dev/testing to catch leaks early.
+
+**********
+How to improve performance of rest request?
+
+1. Request/Response Optimization
+	Use pagination instead of returning huge result sets.
+	Filter & project fields → don’t return unnecessary data (e.g., instead of SELECT *, return only needed JSON fields).
+	Compress responses (GZIP, Brotli) to reduce payload size.
+	Use efficient serialization (e.g., Jackson @JsonIgnore for unused fields, or Protobuf/Avro for heavy traffic).
+	HTTP/2 or gRPC → reduces overhead in high-volume APIs.
+
+2. API Design & Application Layer
+	Use asynchronous/non-blocking requests (e.g., CompletableFuture in Java, WebFlux in Spring Boot, async/await in Node.js).
+	Avoid heavy computations inside API thread → move to background workers (e.g., Kafka, RabbitMQ).
+	Implement rate limiting & throttling → prevent overload.
+	Circuit breaker pattern (Resilience4j, Hystrix) to handle slow downstream services.
+	API Gateway caching → serve frequent responses faster.
+
+3. Network & Infrastructure
+	CDN (Content Delivery Network) for static resources.
+	Load balancing (NGINX, HAProxy, AWS ALB).
+	Keep-alive connections to reduce TCP handshake overhead.
+	TLS session reuse to avoid repeated SSL handshakes.
+	Edge caching for read-heavy APIs.
+
+4. Monitoring & Profiling
+	Use APM tools (New Relic, Datadog, Prometheus + Grafana).
+	Monitor latency, throughput, error rates, slow endpoints.
+	Profile using tools like JProfiler, YourKit (for Java).
+	Log slow queries at the DB level.
+	
+5. Specific Java/Spring Boot Tips
+	Use HikariCP for DB connection pooling.
+	Enable HTTP/2 in Tomcat/Undertow.
+	Use Spring Cache abstraction with Redis.
+	Tune JVM GC (e.g., G1GC, ZGC for low latency).
+	Use DTOs (Data Transfer Objects) to avoid loading entire entity graphs.

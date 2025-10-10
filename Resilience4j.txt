@@ -1,0 +1,155 @@
+Resilience4j:
+
+Resilience4j is a lightweight fault tolerance library designed for Java 8+ and inspired by Netflix Hystrix.
+It provides modules like:
+
+CircuitBreaker
+Retry
+Bulkhead
+TimeLimiter
+RateLimiter
+
+
+RateLimiter:
+
+resilience4j.ratelimiter:
+  instances:
+    myService:
+      limitForPeriod: 5
+      limitRefreshPeriod: 1m
+      timeoutDuration: 5s
+
+Here:
+	myService is the instance name of the rate limiter.
+	At most 5 calls per minute allowed.	
+	If the 3rd call comes, it can wait up to 5s for permission.
+	
+	No waiting (timeoutDuration: 0)
+	
+	After 5 calls in 1 min, a RequestNotPermitted exception is thrown.
+	
+
+@Service
+public class MyService {
+
+    @RateLimiter(name = "myService")
+    public String callApi() {
+        return "Hello from rate-limited service!";
+    }
+}
+
+b) With Fallback
+@Service
+public class MyService {
+
+    @RateLimiter(name = "myService", fallbackMethod = "fallback")
+    public String callApi() {
+        return "Data from external API";
+    }
+
+    public String fallback(RequestNotPermitted ex) {
+        return "Too many requests, please try later!";
+    }
+}
+
+✅ Pros
+
+Easy to integrate with Spring Boot.
+Fine-grained control with annotations.
+Good monitoring with Micrometer/Prometheus.
+Works both synchronously and asynchronously.
+
+❌ Cons
+Not distributed (works within a single app instance).
+For distributed rate limiting → use Redis or API Gateway.
+
+*********************************
+TimeLimiter:
+What is TimeLimiter?
+
+A TimeLimiter ensures that a call does not take longer than a specified time.
+If the method execution exceeds the timeout, it is cancelled.
+Very useful when calling slow or hanging external services.
+Works only with asynchronous calls (CompletableFuture).
+
+resilience4j.timelimiter:
+  instances:
+    myTimeLimiter:
+      timeoutDuration: 2s
+      cancelRunningFuture: true
+
+@Service
+public class MyService {
+
+    @TimeLimiter(name = "myTimeLimiter", fallbackMethod = "fallback")
+    public CompletableFuture<String> slowApi() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(5000); // simulate slow API (5s)
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+            return "Success after delay";
+        });
+    }
+
+    public CompletableFuture<String> fallback(Throwable ex) {
+        return CompletableFuture.completedFuture("Fallback: API took too long!");
+    }
+}
+
+When to use:
+You call a third-party weather API.
+Sometimes it responds in 200ms, sometimes it hangs for 10 seconds.
+If you configure timeoutDuration: 2s:
+Calls that finish ≤ 2s → success.
+Calls that exceed 2s → cancelled, fallback triggered.
+
+*********************************
+Retry:
+What is Retry?
+
+The Retry module in Resilience4j allows you to automatically re-execute a failed method call a certain number of times before giving up.
+
+Useful when:
+An external service is temporarily unavailable.
+Network timeouts happen.
+You want to give the call a second chance instead of failing immediately.
+
+resilience4j.retry:
+  instances:
+    myRetry:
+      maxAttempts: 3
+      waitDuration: 2s
+      retryExceptions:
+        - java.io.IOException
+        - org.springframework.web.client.ResourceAccessException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+
+
+Try up to 3 times (1 initial + 2 retries).
+Wait 2 seconds between retries.
+Only retry on IOException or ResourceAccessException.
+Don’t retry on NullPointerException.
+
+
+@Service
+public class MyService {
+
+    @Retry(name = "myRetry", fallbackMethod = "fallback")
+    public String callExternalApi() {
+        // Imagine this sometimes fails
+        if (new Random().nextBoolean()) {
+            throw new RuntimeException("API failed!");
+        }
+        return "Success!";
+    }
+
+    // Fallback method must accept the same parameters + Exception
+    public String fallback(Exception ex) {
+        return "Fallback: external API not available!";
+    }
+}
+
+********************

@@ -1,0 +1,105 @@
+
+HandlerInterceptor
+Filters vs Interceptor
+
+
+
+IsBlank vs isEmpty in string
+String s1 = "";
+System.out.println(s1.isEmpty());   // true
+System.out.println(s1.isBlank());   // true
+
+String s2 = "   ";
+System.out.println(s2.isEmpty());   // false (length > 0)
+System.out.println(s2.isBlank());   // true (only whitespace)
+
+String s3 = "abc";
+System.out.println(s3.isEmpty());   // false
+System.out.println(s3.isBlank());   // false
+
+
+**********************
+@Component vs @Bean
+| Feature                   | `@Component`                                               | `@Bean`                                                      |
+| ------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| **Where used**            | On a **class**                                             | On a **method**                                              |
+| **Detection**             | Through **component scanning**                             | Through **Java config class**                                |
+| **Control over creation** | Limited (Spring creates object automatically)              | Full (you write the method and decide how to build it)       |
+| **Use case**              | For your own classes (services, repositories, controllers) | For third-party classes (e.g., `ObjectMapper`, `DataSource`) |
+| **Example**               | `@Component public class UserService {}`                   | `@Bean public ObjectMapper objectMapper() { ... }`           |
+
+@Component
+public class MyService {
+    public String serve() {
+        return "Serving...";
+    }
+}
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MyService myService() {
+        return new MyService(); // manually returning bean
+    }
+}
+
+******************
+2 databases in sping data jpa
+
+spring:
+  datasource:
+    userdb:
+      url: jdbc:postgresql://localhost:5432/userdb
+      username: user
+      password: pass
+      driver-class-name: org.postgresql.Driver
+
+    auditdb:
+      url: jdbc:mysql://localhost:3306/auditdb
+      username: audit
+      password: pass
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+    basePackages = "com.example.user.repo",   // repositories package for User DB
+    entityManagerFactoryRef = "userEntityManagerFactory",
+    transactionManagerRef = "userTransactionManager"
+)
+public class UserDbConfig {
+
+    @Bean
+    @ConfigurationProperties("spring.datasource.userdb")
+    public DataSource userDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+
+    @Bean(name = "userEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean userEntityManagerFactory(
+            EntityManagerFactoryBuilder builder) {
+        return builder
+                .dataSource(userDataSource())
+                .packages("com.example.user.model")  // entity package for User DB
+                .persistenceUnit("userPU")
+                .build();
+    }
+
+    @Bean(name = "userTransactionManager")
+    public PlatformTransactionManager userTransactionManager(
+            @Qualifier("userEntityManagerFactory") EntityManagerFactory emf) {
+        return new JpaTransactionManager(emf);
+    }
+}
+
+and same for AuditDbConfig 
+
+@Transactional("userTransactionManager")
+@Transactional("auditTransactionManager")
+
+
+
+
+

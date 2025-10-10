@@ -1,0 +1,35 @@
+JIT in Java
+
+In Java, JIT stands for Just-In-Time Compiler. It is part of the Java
+Virtual Machine (JVM) that improves the performance of Java
+applications.
+
+How It Works: 1. When you run a Java program: - The Java code (.java) is
+first compiled into bytecode (.class) by the javac compiler. - This
+bytecode is platform-independent and runs on the JVM. 2. Normally, the
+JVM interprets bytecode line by line into machine code at runtime (which
+is slower). 3. The JIT compiler steps in: - It detects frequently
+executed parts of code (called “hot spots”). - It compiles them into
+native machine code once. - Next time, the JVM executes that native code
+directly → much faster.
+
+Types of Compilation: - Interpretation: Reads bytecode line by line →
+slower. - JIT Compilation: Converts hot spots into native code → faster
+execution.
+
+Benefits of JIT: - Speeds up execution by avoiding repeated
+interpretation. - Performs optimizations (like inlining methods,
+removing redundant code). - Balances between portability (via bytecode)
+and performance (via native code).
+
+Example: Suppose you have a loop running millions of times:
+
+for (int i = 0; i < 1000000; i++) { System.out.println(i); }
+
+-   The JVM initially interprets the bytecode.
+-   The JIT compiler notices this loop runs many times.
+-   It compiles the loop into machine code → execution becomes much
+    faster after the first few iterations.
+
+In short: JIT in Java = Runtime compiler inside JVM that makes programs
+run faster by compiling bytecode into native code on the fly.

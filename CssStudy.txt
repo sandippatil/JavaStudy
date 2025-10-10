@@ -25,6 +25,21 @@ Display Values:
 ***
 display: none vs visibility: none
 
+1. display: none;
+	Removes the element from the layout completely.
+	The browser behaves as if the element doesn’t exist.
+	No space is reserved for it.
+	Example use case: hide/show dropdown menus or modals.
+	If applied, other elements shift to fill the gap.
+
+2. visibility: hidden;
+	Keeps the element in the layout, but makes it invisible.
+	The element still takes up space, but it’s not visible to the user.
+	Example use case: hide content temporarily without breaking layout alignment.
+	
+	If applied, you’ll still see the "blank" space where the element would be.
+	
+
 ***
 opacity
 backgroun-color: rgba(120,75,27,0.2)
@@ -72,7 +87,7 @@ window.
 </div>
 ***
 positions:
-static: this is default.. top, bottom, left right not work
+static: this is default.. top, bottom, -left right not work
 | Value      | Description                                                                                      |
 | ---------- | ------------------------------------------------------------------------------------------------ |
 | `static`   | Default. Element is in normal flow (no positioning).                                             |

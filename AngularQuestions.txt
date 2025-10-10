@@ -22,6 +22,29 @@ greet(name: string): string {
   return "Hello " + name;
 }
 
+1. What is a Decorator in Angular?
+A decorator is a special kind of function that adds metadata to classes, properties, methods, or parameters. 
+Angular uses decorators to define how things like components, services, and pipes should behave.
+Decorators are prefixed with @.
+Examples: @Component, @Injectable, @NgModule, @Input, @Output, etc.
+
+| Feature               | `@Component` (Component Decorator)  | Decorator (General Concept)                 |
+| --------------------- | ----------------------------------- | ------------------------------------------- |
+| **What it is**        | A specific **type of decorator**    | A function that adds metadata               |
+| **Purpose**           | Defines a **UI component**          | Used to **annotate classes/members**        |
+| **Where it's used**   | On a class that defines a component | On classes, properties, parameters          |
+| **Example**           | `@Component({...})`                 | `@Input()`, `@Injectable()`, etc.           |
+| **Angular-specific?** | Yes                                 | No (Decorators are a TypeScript/ES feature) |
+| **Part of UI?**       | Yes                                 | Not necessarily                             |
+
+| Category  | Decorators                                                               |
+| --------- | ------------------------------------------------------------------------ |
+| Class     | `@Component`, `@Directive`, `@Pipe`, `@Injectable`, `@NgModule`          |
+| Property  | `@Input`, `@Output`, `@HostBinding`, `@HostListener`, `@ViewChild`, etc. |
+| Parameter | `@Inject`, `@Optional`, `@Self`, `@SkipSelf`, `@Host`                    |
+| Custom    | User-defined (e.g., `@Log`, `@Cache`, etc.)                              |
+
+
 2. What is a component in Angular?
 Answer: A component is a building block of Angular applications. It consists of:
 - Template (HTML)
@@ -319,7 +342,6 @@ Easy for development (hot reload, fast rebuilds)
 Detects template errors at runtime
 
 ng serve   # default uses JIT
-
 
 10. What is routing in Angular?
 Answer: Routing allows navigation between different views or components. It's defined in a RouterModule

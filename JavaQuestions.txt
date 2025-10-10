@@ -168,7 +168,7 @@ engine.info();
 
 | Feature                    | Static Inner Class           | Non-static Inner Class            |
 | -------------------------- | ---------------------------- | --------------------------------- |
-| Needs outer class object?  | ❌ No                         | ✅ Yes                             |
+| Needs outer class object?  | ❌ No                         | ✅ Yes                           |
 | Access outer class members | Only static members          | All members (even private)        |
 | Memory efficiency          | More efficient (independent) | Less efficient (depends on outer) |
 
@@ -283,9 +283,9 @@ public class ProducerConsumer {
 
 | Feature     | `String`        | `StringBuffer`          | `StringBuilder`          |
 | ----------- | --------------- | ----------------------- | ------------------------ |
-| Mutable     | ❌ No            | ✅ Yes                   | ✅ Yes                    |
-| Thread-safe | ✅ Yes           | ✅ Yes (synchronized)    | ❌ No                     |
-| Performance | ❌ Slow          | ⚠️ Medium               | ✅ Fastest                |
+| Mutable     | ❌ No            | ✅ Yes                   | ✅ Yes                  |
+| Thread-safe | ✅ Yes           | ✅ Yes (synchronized)    | ❌ No                   |
+| Performance | ❌ Slow          | ⚠️ Medium               | ✅ Fastest               |
 | Use Case    | Constants, keys | Multi-threaded text ops | Fast single-threaded ops |
 
 StringBuffer sb = new StringBuffer("Hello");
@@ -820,7 +820,7 @@ Checked Exceptions are the exceptions that are checked during compile time of a 
 if some code within a method throws a checked exception, then the method must either handle the exception 
 or must specify the exception using the throws keyword. 
 
-Checked exceptions are of two types: 
+Checked exceptions are of two types:
 Fully checked exceptions: all its child classes are also checked, like IOException, and InterruptedException.
 Partially checked exceptions: some of its child classes are unchecked, like an Exception. 
 

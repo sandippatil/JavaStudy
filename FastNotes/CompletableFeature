@@ -1,0 +1,13 @@
+CompletableFuture.supplyAsync(()->{
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return "Hello";
+		}).thenApply(message->{
+		
+				return message+", Sandip";
+		}).thenAccept(finalMessage->{
+			System.out.println(finalMessage);
+		});

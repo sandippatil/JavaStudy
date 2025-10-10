@@ -1,0 +1,52 @@
+Java 8:
+	1. Functional interface, lambda expression, method reference
+	2. Stream api
+	3. Optional
+	4. Date time api
+	5. default and static methods in interface
+	6. New javascript engine
+	7. CompletableFeature
+
+Java 9:
+	1. private methods in interface
+	2. Jshell
+
+Java 10:
+	1. var keyword: Local Variable Type Inference
+
+Java 11:
+	1. var in lambdas
+	2. New String methods – isBlank(), lines(), strip(), etc.
+
+Java 12:
+	1. No break needed in switch
+	2. Supports -> lambda-like syntax in switch
+
+Java 13:
+	1. Text Blocks
+
+Java 14:
+	1. Record class
+	2. Helpful NullPointerExceptions
+
+Java 15:
+	1. Sealed Classes/Interface preview 
+
+Java 16:
+	1️. Record – stable in Java 16
+	2. Stream.toList()
+	
+Java 17:
+	1️. Sealed Classes/Interface final -> sealed interface Animal permits Dog, Cat {}
+	2. Enhanced Random Number Generator API
+
+Java 18:
+	1. Java files saved in UTF-8 by default (JEP 400)
+	2. SimpleWebServer (JEP 408) – CLI only
+	
+Java 19:
+	1. Virtual Threads (Project Loom)
+	2️. Record Pattern Matching (Preview)
+	3️ Pattern Matching for switch (Preview)
+
+Java 20:

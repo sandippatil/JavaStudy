@@ -1,0 +1,212 @@
+@Async
+
+@Async is an annotation used to run a method asynchronously, i.e., in a separate thread, without blocking 
+the main execution flow. It’s commonly used in Spring Framework to improve performance and responsiveness,
+especially for tasks that take time (like sending emails, making API calls, or processing files).
+
+When the method is called, Spring executes it in a separate thread (from a thread pool).
+The caller does not wait for the method to finish.
+
+Works only on public methods (due to Spring proxying).
+Thread pool can be customized with a TaskExecutor bean.
+
+@Service
+public class EmailService {
+
+    @Async
+    public void sendEmail(String to, String subject, String body) {
+        try { Thread.sleep(5000); } catch (InterruptedException e) {}
+        System.out.println("Email sent to " + to + " with subject " + subject);
+    }
+	
+	@Async
+	public CompletableFuture<String> processData() {		
+		try { Thread.sleep(3000); } catch (InterruptedException e) {}
+		return CompletableFuture.completedFuture("Processed Data");
+	}
+}
+
+
+@EnableAsync
+public class AsyncExampleApp {
+
+}
+
+//caller
+CompletableFuture<String> result = myService.processData();
+System.out.println("Doing other work while data is processed...");
+System.out.println("Result: " + result.get()); // waits only when you need the result
+
+// Custom config
+public class AsyncConfig {
+
+    @Bean(name = "taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);     // Minimum number of threads
+        executor.setMaxPoolSize(10);     // Maximum number of threads
+        executor.setQueueCapacity(25);   // Queue size before spawning new threads
+        executor.setThreadNamePrefix("AsyncThread-");
+        executor.initialize();
+        return executor;
+    }
+}
+
+@Service
+public class ReportService {
+
+    @Async("taskExecutor")  // use custom executor bean
+    public void generateReport() {
+        System.out.println(Thread.currentThread().getName() + " generating report...");
+        try { Thread.sleep(4000); } catch (InterruptedException e) {}
+        System.out.println("Report generated!");
+    }
+}
+
+***********
+What is Reactive Programming?
+
+Reactive programming in Java is a programming paradigm focused on building asynchronous, non-blocking, and 
+event-driven systems.
+
+Instead of pulling data when needed (imperative style), reactive programming reacts to data/events as 
+they arrive.
+
+It is based on the Reactive Streams specification, which defines four key interfaces:
+
+Publisher → Emits a stream of data/events.
+Subscriber → Consumes the data/events.
+Subscription → Controls the flow (request, cancel).
+Processor → A bridge (both Publisher & Subscriber).
+
+
+Why Reactive?
+1. Handles large volumes of data/events efficiently.
+2. Avoids blocking threads (better scalability).
+3. Ideal for I/O-heavy apps (APIs, DB calls, messaging, streaming).
+4. Fits microservices and cloud-native systems.
+
+
+Example with Project Reactor
+
+Spring uses Project Reactor (Mono and Flux) as its reactive library.
+Mono<T> → 0 or 1 item (like Optional async).
+Flux<T> → 0..N items (like a List async).
+
+// Mono -> single value
+Mono<String> mono = Mono.just("Hello Reactive");
+mono.subscribe(System.out::println);
+
+// Flux -> multiple values
+Flux<String> flux = Flux.just("A", "B", "C");
+flux.subscribe(item -> System.out.println("Received: " + item));
+
+
+//Web Flux reactive controller
+
+<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		
+@RestController
+public class ReactiveController {
+
+    @GetMapping("/numbers")
+    public Flux<Integer> streamNumbers() {
+        return Flux.range(1, 10)
+                   .delayElements(Duration.ofSeconds(1)); // emit 1 number per second
+    }
+}
+
+What happens here
+
+Flux.range(1,10) → emits numbers 1..10.
+
+delayElements(Duration.ofSeconds(1)) → emits one number every second.
+
+Because this is WebFlux, Spring will by default return Server-Sent Events (SSE) or JSON stream, 
+depending on configuration.
+
+1. JSON Stream
+	Format: Regular JSON (array or objects).
+	Typically buffered by the client → you see the whole response only after completion.
+	Example output:
+		[1,2,3,4,5,6,7,8,9,10]
+	In your Flux.range(1,10) case:
+	Without MediaType.TEXT_EVENT_STREAM_VALUE, Spring WebFlux writes a JSON array.
+	If you add delayElements(1s), many clients (like Postman) still wait until all items are ready before showing them.
+	Good for when you want the full dataset at once.
+	
+2. SSE (Server-Sent Events)
+	Format: Text-based protocol (text/event-stream).
+	Data is sent event by event, line by line, without closing the HTTP connection.
+	Example output (your Flux):	
+		data:1
+		data:2
+		data:3
+		...
+		data:10
+
+	Each data: line is one event message.
+	Connection stays open until the Flux completes (or forever, if it’s an infinite stream).
+	Good for real-time updates (stock prices, notifications, live logs, chat).
+	
+
+| Feature         | JSON Stream                         | SSE (Server-Sent Events)                 |
+| --------------- | ----------------------------------- | ---------------------------------------- |
+| MIME Type       | `application/json`                  | `text/event-stream`                      |
+| Delivery        | Usually **buffered** → client waits | **Streaming**, delivered piece by piece  |
+| Connection      | Closed after response               | Stays **open** until completed/cancelled |
+| Best for        | Returning full data sets            | Real-time, push-style updates            |
+| Client handling | Parsed as JSON                      | Handled as event messages                |
+
+
+When to Use What
+	Use JSON stream when the client just needs the complete response (e.g., get all users).
+	Use SSE when you want to push updates continuously (e.g., streaming logs, live counters, chat messages).
+	
+
+Angular: Consuming SSE
+
+export class NumbersService {
+
+  constructor(private zone: NgZone) {}
+
+  getNumbers(): Observable<number> {
+    return new Observable<number>(observer => {
+      const eventSource = new EventSource('http://localhost:8080/numbers');
+
+      eventSource.onmessage = (event) => {
+        // Run inside Angular zone so change detection works
+        this.zone.run(() => {
+          observer.next(Number(event.data));
+        });
+      };
+
+      eventSource.onerror = (error) => {
+        this.zone.run(() => {
+          observer.error(error);
+        });
+        eventSource.close();
+      };
+
+      return () => eventSource.close(); // cleanup
+    });
+  }
+}
+
+
+export class AppComponent implements OnInit {
+  numbers: number[] = [];
+
+  constructor(private numbersService: NumbersService) {}
+
+  ngOnInit(): void {
+    this.numbersService.getNumbers().subscribe({
+      next: (num) => this.numbers.push(num),
+      error: (err) => console.error('SSE error:', err)
+    });
+  }
+}
+

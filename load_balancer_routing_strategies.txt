@@ -1,0 +1,46 @@
+Load Balancer Routing Strategies
+
+Load balancers distribute incoming network traffic across multiple servers (or instances) to ensure high availability, reliability, and scalability. They use different routing strategies (also called load balancing algorithms) to decide which server should handle each request.
+
+1. Round Robin:
+- Requests are distributed sequentially across servers in a circular order.
+- Best for: Equal-capacity servers with similar workloads.
+
+2. Weighted Round Robin:
+- Like Round Robin, but each server gets a weight. Higher-weight servers receive more requests.
+- Best for: Servers with different processing power or capacity.
+
+3. Least Connections:
+- Routes the request to the server with the fewest active connections.
+- Best for: Long-lived connections (e.g., databases, chat apps).
+
+4. Weighted Least Connections:
+- Combines server weight and active connections. A server with higher weight still gets more traffic but based on load.
+- Best for: Environments with mixed server capacities.
+
+5. IP Hash (or Source IP Hashing):
+- The client’s IP address is hashed and mapped to a server. Ensures a client is consistently routed to the same server.
+- Best for: Session persistence (sticky sessions).
+
+6. Random Choice:
+- A server is selected randomly from the pool. Can also be weighted random.
+- Best for: Simple, stateless workloads.
+
+7. Least Response Time:
+- Routes traffic to the server with the fastest response time (and sometimes lowest connections).
+- Best for: Performance-sensitive applications.
+
+8. Geographic (Geo-based Routing):
+- Routes users to the closest data center based on geography. Reduces latency and improves user experience.
+- Best for: Global applications (CDNs, multi-region apps).
+
+9. Consistent Hashing:
+- Hashing on request attributes (like user ID, session ID). Ensures the same client/request attribute always goes to the same server, even if servers are added/removed.
+- Best for: Caching systems and distributed storage.
+
+Summary:
+- Round Robin / Weighted → Simple and fair.
+- Least Connections / Response Time → Load-aware.
+- IP Hash / Consistent Hashing → Stickiness & persistence.
+- Geo-based → Latency reduction for global users.
+- Random → Simple, useful for stateless workloads.

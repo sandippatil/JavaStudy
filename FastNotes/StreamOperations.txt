@@ -1,0 +1,30 @@
+a. Intermediate:
+	1. filter
+	2. map, mapToObj
+	3. flatmap
+	4. skip
+	5. limit
+	6. sorted
+	7. peek
+	8. boxed -> convert primitive streams (IntStream, LongStream, DoubleStream) into object streams 
+	
+b. Terminal Operations:
+	1. min,max,count
+	2. findFirst,findAny
+	3. allMatch,anyMatch,noneMatch
+	4. forEach
+	5. reduce
+	6. toArray
+	7. collect
+
+c. Collectors:
+	1. groupingBy
+	2. partitioningBy
+	3. counting, averagingDouble, summingDouble	
+	4. filtering
+	5. joining
+	6. reducing
+	7. summarizing	
+	8. toList,toSet, toMap, toCollection
+	9. collectingAndThen
+	

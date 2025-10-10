@@ -1,0 +1,333 @@
+https://www.tutorialspoint.com/typescript/typescript_tuples.htm
+
+What is TypeScript:
+TypeScript is a programming language developed by Microsoft that builds on JavaScript by adding 
+static type checking.
+
+Superset of JavaScript: Any valid JavaScript code is also valid TypeScript code.
+Optional static typing: You can define types for variables, function parameters, return values, etc.
+Compiles to JavaScript: TypeScript code is compiled (transpiled) to standard JavaScript so it can run in any browser or JavaScript runtime.
+Client and server side: 
+Object Oriented: 
+
+Why use TypeScript?
+✅ Catch errors early: Type errors are caught during development, not at runtime.
+🧠 Better IDE support: Features like autocompletion, refactoring, and code navigation are more powerful.
+🔄 Maintainability: Helps manage large codebases with clear contracts and fewer bugs.
+🤝 Improved team collaboration: Code is more self-documented with types.
+
+***
+| Feature                     | **Node.js**                            | **Angular (2+ and above)**                              |
+| --------------------------- | -------------------------------------- | ------------------------------------------------------- |
+| 🧠 **What is it?**          | JavaScript **runtime environment**     | Frontend **web application framework**                  |
+| 🎯 **Primary Use**          | Backend (server-side development)      | Frontend (client-side UI and logic)                     |
+| 💻 **Runs On**              | Server (outside the browser)           | Browser (inside the user's device)                      |
+| 🛠️ **Built With**          | C++, JavaScript (built on Chrome’s V8) | TypeScript (superset of JavaScript)                     |
+| 🧱 **Used For**             | Building APIs, servers, microservices  | Building single-page apps (SPAs) and UIs                |
+| 📦 **Has Package Manager?** | Yes, uses `npm`                        | No built-in manager, but depends on `npm` for libraries |
+| 🏗️ **Scalability**         | Great for real-time & scalable apps    | Great for complex UI with component architecture        |
+| 🧑‍💻 **Example**           | REST API, chat app backend             | Admin dashboards, user portals, Gmail-like apps         |
+
+***
+Why do we need to install Node.js for Angular?
+
+Angular uses a tool called the Angular CLI (@angular/cli) to:
+	Create projects
+	Build code
+	Serve your app locally
+	Run tests and linting
+	This CLI is installed via npm, which comes with Node.js.
+
+2. Package Management (npm)
+	Angular apps depend on hundreds of libraries (like RxJS, Angular core, etc.).
+	You need npm (Node Package Manager) to:
+		Download packages
+		Manage dependencies (package.json)
+		Install updates and plugins
+
+3. Build and Compile Angular Code
+	Angular is written in TypeScript, which must be compiled to JavaScript.
+	The Angular CLI uses Node.js to:
+		Transpile TypeScript
+		Optimize assets
+		Bundle everything using Webpack or Vite
+
+
+****
+Keywords:
+
+different than java:
+string any as var number get module type export
+
+break continue switch case if else for do while
+try catch finally throw
+instanceof	typeof
+public	private	
+enum void
+null super	this	new
+in	return	true	false
+extends	static	let
+package	implements	interface	function
+new		yield	const
+
+***
+Keyword explanation:
+** get: Used inside a class to define a read-only property.
+
+class Person {
+  constructor(private _name: string) {}
+
+  get name(): string {
+    return this._name;
+  }
+}
+
+const p = new Person("Sandip");
+console.log(p.name); // Uses the getter
+
+***
+TypeScript is Case-sensitive
+
+***
+Semicolons are optional
+
+***
+Single-line comments ( // ) − Any text between a // and the end of a line is treated as a comment
+Multi-line comments (/* */) − These comments may span multiple lines.
+
+class Greeting{
+	
+	greet(name: string):void{
+		console.log("My name is:"+name);
+	}
+}
+
+var obj= new Greeting();
+obj.greet("Sandip")
+
+
+| **Feature**                  | **JavaScript**                              | **TypeScript**                                    |
+| ---------------------------- | ------------------------------------------- | ------------------------------------------------- |
+| **Typing**                   | Dynamic typing                              | Static typing                                     |
+| **Compilation**              | Interpreted by browsers/Node.js             | Compiled into JavaScript                          |
+| **Error Detection**          | Runtime errors                              | Compile-time errors                               |
+| **Tooling Support**          | Basic                                       | Advanced (autocompletion, refactoring, etc.)      |
+| **Prototypal Inheritance**   | Uses prototypes                             | Supports classes and classical inheritance        |
+| **Use Cases**                | Small to medium projects, quick prototyping | Large projects, complex applications              |
+| **Code Maintainability**     | Can be harder in large codebases            | Easier due to static typing and interfaces        |
+| **Interfaces**               | Not natively supported                      | Supported, and improved code structure            |
+| **Type Inference**           | Not available                               | Available, reduces the need for explicit types    |
+| **Access Modifiers**         | Not supported                               | Supports private, public, and protected modifiers |
+| **Asynchronous Programming** | Callbacks, Promises, async/await            | Same as JavaScript, with type safety              |
+
+
+***
+Typescript features:
+1. Type Annotation or static typing
+2. interface
+3. classes
+4. inheritance
+5. Enum
+6. Generics
+
+*******
+Variable Declaration:
+4 ways:
+
+1. var indetifier: type=value;
+	var name: string = "Sandip";
+
+2. var identifier:type;
+	var age:number; // Declare its type but no value. In this case, the variable will be set to undefined.
+	
+3. var identifier=value;
+	var name="Sandip";
+
+4. var identifier;
+	var name;  // default to undefined
+
+****
+Type Assertion or type casting:
+var str = '1' 
+var str2:number = <number> <any> str   //str is now of type number 
+console.log(typeof(str2))
+
+****
+Variable Scope:
+1. Global Scope
+2. Class Scope
+3. Local scope
+
+var global_num = 12          //global variable 
+class Numbers { 
+   num_val = 13;             //class variable 
+   static sval = 10;         //static field 
+   
+   storeNum():void { 
+      var local_num = 14;    //local variable 
+   } 
+} 
+console.log("Global num: "+global_num)  
+console.log(Numbers.sval)   //static variable  
+var obj = new Numbers(); 
+console.log("Global num: "+obj.num_val) 
+
+****
+let vs const:
+| **Feature**                         | **`let`**                                   | **`const`**                                            |
+| ----------------------------------- | ------------------------------------------- | ------------------------------------------------------ |
+| **Reassignment**                    | ✅ Allowed                                   | ❌ Not allowed (value is constant)                      |
+| **Initialization**                  | Can be declared without initializing        | Must be initialized at declaration                     |
+| **Block Scope**                     | Yes                                         | Yes                                                    |
+| **Mutability (for objects/arrays)** | The variable can be reassigned              | The reference is constant, but **contents** can change |
+| **Best Use Case**                   | When the variable needs to be updated later | When the value should never change                     |
+
+let count = 1;
+count = 2; // ✅ Works fine
+
+const name = "Alice";
+// name = "Bob"; ❌ Error: Cannot assign to 'name' because it is a constant.
+
+const user = { name: "John" };
+user.name = "Doe"; // ✅ Allowed: we changed property, not the reference
+
+// user = { name: "Someone else" }; ❌ Error: Cannot reassign the const variable
+
+
+****
+let vs var:
+
+| **Feature**               | **`let`**                                            | **`var`**                                            |
+| ------------------------- | ---------------------------------------------------- | ---------------------------------------------------- |
+| **Scope**                 | Block-scoped (`{}`)                                  | Function-scoped                                      |
+| **Hoisting**              | Hoisted but **not initialized** (temporal dead zone) | Hoisted and **initialized as `undefined`**           |
+| **Re-declaration**        | ❌ Not allowed in the same scope                      | ✅ Allowed in the same scope                          |
+| **Global Object Binding** | ❌ Not attached to `window` in browsers               | ✅ Attached to `window` in browsers                   |
+| **Use in Loops**          | Safer due to block scoping                           | Can cause bugs due to shared scope across iterations |
+| **Best Practice**         | ✅ Recommended                                        | ❌ Avoid using `var`                                  |
+
+
+function testVar() {
+    if (true) {
+        var a = 10;
+    }
+    console.log(a); // ✅ 10 — var is function-scoped.. can be used anywhere in function after declaration
+}
+
+function testLet() {
+    if (true) {
+        let b = 20;
+    }
+    console.log(b); // ❌ Error — b is block-scoped.. allowed only within block.. its like java veriables..
+}
+
+
+console.log(x); // undefined (hoisted)
+var x = 5;
+
+console.log(y); // ❌ ReferenceError: Cannot access 'y' before initialization
+let y = 10;
+
+var a = 1;
+var a = 2; // ✅ redeclaration Allowed
+
+let b = 1;
+let b = 2; // ❌ SyntaxError: Identifier 'b' has already been declared
+
+******** Dont use var ********
+Always use let or const – they’re predictable and safe.
+Avoid var, especially in modern TypeScript or JavaScript projects.
+
+****
+Any type:
+The any data type is the super type of all types in TypeScript. It denotes a dynamic type. Using the any
+type is equivalent to opting out of type checking for a variable.
+
+Built-in types:
+number, string, boolean, void, null, undefined,symbol , object, never
+
+let first_name: string = 'John';
+let last_name: string = "Doe";
+let full_name: string = `${first_name} ${last_name}`;
+
+Object type:
+The object is a non-primitive data type, which can contain any value that is not a number, string, 
+boolean, symbol, null, or undefined. You can create an object using either object literal or Object()
+constructor.
+
+let person: object = {name: "Bob"};
+
+Array:
+let numbers: number[] = [1, 2, 3];
+
+var alphas:string[]; 
+alphas = ["1","2","3","4"] 
+
+var arr_names = new Array(4);
+var names:string[] = new Array("Mary","Tom","Jack","Jill") 
+
+var arr_names:number[] = new Array(4)  
+
+for(let i = 0;i<arr_names.length;i++) { 
+   arr_names[i] = i * 2 
+   console.log(arr_names[i]) 
+}
+
+var arr:number[] = [12,13] 
+var[x,y] = arr 
+console.log(x) 
+console.log(y)
+
+***
+Array Methods:
+| Method          | Description                                     | Example                    |
+| --------------- | ----------------------------------------------- | -------------------------- |
+| `forEach()`     | Executes a function on each element             | `arr.forEach(x => ...)`    |
+| `map()`         | Transforms each element and returns a new array | `arr.map(x => x * 2)`      |
+| `filter()`      | Returns elements that match a condition         | `arr.filter(x => x > 5)`   |
+| `reduce()`      | Reduces array to a single value                 | `arr.reduce((a,b) => a+b)` |
+| `reduceRight()` | Like `reduce()`, but from right                 | `arr.reduceRight(...)`     |
+| `some()`        | Returns `true` if any element matches           | `arr.some(x => x > 0)`     |
+| `every()`       | Returns `true` if all elements match            | `arr.every(x => x > 0)`    |
+| `find()`        | Returns the first matching element              | `arr.find(x => x > 3)`     |
+| `findIndex()`   | Returns index of first matching element         | `arr.findIndex(...)`       |
+
+| Method         | Description                             | Example                |
+| -------------- | --------------------------------------- | ---------------------- |
+| `push()`       | Adds element(s) to the end              | `arr.push(5)`          |
+| `pop()`        | Removes last element                    | `arr.pop()`            |
+| `shift()`      | Removes first element                   | `arr.shift()`          |
+| `unshift()`    | Adds element(s) to the beginning        | `arr.unshift(1)`       |
+| `splice()`     | Adds/removes elements at specific index | `arr.splice(1, 1)`     |
+| `fill()`       | Fills with a static value               | `arr.fill(0)`          |
+| `copyWithin()` | Copies a sequence to another index      | `arr.copyWithin(0, 2)` |
+
+| Method          | Description                 | Example              |
+| --------------- | --------------------------- | -------------------- |
+| `indexOf()`     | Index of first occurrence   | `arr.indexOf(3)`     |
+| `lastIndexOf()` | Index of last occurrence    | `arr.lastIndexOf(3)` |
+| `includes()`    | Checks if value is in array | `arr.includes(4)`    |
+
+| Method      | Description          | Example         |
+| ----------- | -------------------- | --------------- |
+| `sort()`    | Sorts array in-place | `arr.sort()`    |
+| `reverse()` | Reverses the array   | `arr.reverse()` |
+
+| Method       | Description                | Example                     |
+| ------------ | -------------------------- | --------------------------- |
+| `concat()`   | Merges arrays              | `arr.concat([1, 2])`        |
+| `slice()`    | Returns a portion of array | `arr.slice(1, 3)`           |
+| `join()`     | Joins elements into string | `arr.join(", ")`            |
+| `toString()` | Converts array to string   | `arr.toString()`            |
+| `flat()`     | Flattens nested arrays     | `[[1], [2]].flat()`         |
+| `flatMap()`  | Maps and flattens array    | `arr.flatMap(x => [x * 2])` |
+
+
+****
+tuple:
+To store a collection of values of different types.
+
+const myTuple: [number, string] = [10,"Hello"];
+ng the tuplelet myTuple: [number, string]; // declaration
+myTuple = [10, "Hello"]; // initializing the tuple
+

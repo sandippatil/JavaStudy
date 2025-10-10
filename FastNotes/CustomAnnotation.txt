@@ -1,0 +1,27 @@
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface FixedField {
+    int start();
+    int length();
+}
+
+public class FixedLengthParser {
+
+    public static <T> T parse(String message, Class<T> clazz) throws Exception {
+        T obj = clazz.getDeclaredConstructor().newInstance();
+
+        for (Field field : clazz.getDeclaredFields()) {
+            FixedField annotation = field.getAnnotation(FixedField.class);
+            if (annotation != null) {
+                int start = annotation.start();
+                int length = annotation.length();
+
+                String value = message.substring(start, Math.min(start + length, message.length())).trim();
+                field.setAccessible(true);
+                field.set(obj, value);
+            }
+        }
+
+        return obj;
+    }
+}

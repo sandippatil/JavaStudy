@@ -1,0 +1,21 @@
+a. Creational:
+	1. Singleton -> ensures that a class has only one instance 
+	2. Builder ->used to construct complex objects step-by-step, especially when an object has many optional parameters.
+	3. Factory -> To create objects of a single product family. i.e: Animal -> Dog, Cat
+	4. Abstract Factory -> To create objects of a multiple product family. Button,CheckBox -> Windows Button, Mac Button -> Windows Gui, Mac Gui 
+
+b. Structural:
+	1. Adaptor -> The Adapter Pattern allows objects with incompatible interfaces to work together-> Printer->LegacyPrinter
+	2. Bridge -> pattern allows you to separate the abstraction from the implementation. Vehicle, Workshop example 
+	3. Composite -> Pattern allows you to treat individual objects and groups of objects uniformly. Graphic-> Circle, Rectangle, Drawing
+	4. Decorator -> allows you to dynamically add new behavior to objects without altering their structure or using subclassing.
+					Coffee-> CoffeeDecorator -> 
+	5. Flyweight -> minimizes memory usage by sharing common data use HashMap to store and retrive
+	6. Proxy ->  provides a placeholder for another object to control access to it. Image->RealImage,ProxyImage loads image lazily
+ 
+ c. Behavioral:
+ 	1. Iterator
+ 	2. Observer Subscriber-> notify multiple objects about state changes in another object.
+ 	3. Template -> Template Pattern defines the skeleton of an algorithm in a base class, letting subclasses override specific 
+ 					steps without changing the algorithm's structure.
+ 					Game final void play() {initialize();startPlay();endPlay();}->Football,Cricket

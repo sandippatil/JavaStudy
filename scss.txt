@@ -1,0 +1,56 @@
+SCSS (Sassy CSS)
+
+SCSS stands for Sassy CSS. It’s a syntax of Sass (Syntactically Awesome
+Stylesheets), which is a CSS preprocessor.
+
+Key Points: - Extension of CSS: SCSS adds programming-like features
+(variables, nesting, mixins, inheritance) to regular CSS, making
+stylesheets more maintainable and reusable. - File Extension: Files use
+the .scss extension. - Superset of CSS: Any valid CSS code is also valid
+SCSS code, which makes it easier to adopt incrementally. - Compilation:
+SCSS code is compiled (transpiled) into standard CSS that browsers can
+understand.
+
+Features: 1. Variables ```scss 
+
+$primary-color: #3498db;
+
+body { background: $primary-color; } ```
+
+2.  Nesting
+
+        nav {
+          ul {
+            list-style: none;
+          }
+          li {
+            display: inline-block;
+          }
+        }
+
+3.  Mixins (Reusable Code Blocks)
+
+        @mixin flex-center {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .box {
+          @include flex-center;
+        }
+
+4.  Inheritance
+
+        .message {
+          border: 1px solid #ccc;
+          padding: 10px;
+        }
+
+        .success {
+          @extend .message;
+          border-color: green;
+        }
+
+In short: SCSS = CSS with superpowers. It helps developers write
+cleaner, more scalable, and maintainable styles.

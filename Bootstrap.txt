@@ -1,0 +1,16 @@
+1. What are the advantages of Bootstrap?
+	Responsive Design – Adapts layout across all screen sizes using a 12-column grid system.
+	Pre-styled Components – Offers ready-to-use UI components like buttons, modals, and navbars.
+	Cross-Browser Support – Ensures consistent appearance across all major browsers.
+	Customizable – Easily change styles using Sass variables and theming.
+	Beginner-Friendly – Simple to use with minimal HTML/CSS knowledge.
+	Strong Community – Backed by large community and extensive documentation.
+	Easy Integration – Works well with frameworks like Angular via ng-bootstrap or ngx-bootstrap.
+
+
+
+
+
+
+
+

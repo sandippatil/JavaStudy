@@ -1,0 +1,108 @@
+What is SOLID principles:
+
+1. S - Single Responsibility Principle (SRP)
+	Class should have only one job or responsibility.
+	If a class is handling multiple responsibilities, it's likely to change for multiple reasons, 
+	which increases coupling and decreases maintainability.
+
+Bad Example:
+public class Invoice {
+    public void calculateTotal() {
+        // logic to calculate total
+    }
+
+    public void saveToDatabase() {
+        // logic to save invoice
+    }
+
+    public void printInvoice() {
+        // logic to print invoice
+    }
+}
+
+Good Example:
+public class Invoice {
+    public void calculateTotal() {
+        // only calculation logic
+    }
+}
+
+public class InvoiceRepository {
+    public void save(Invoice invoice) {
+        // only DB logic
+    }
+}
+
+public class InvoicePrinter {
+    public void print(Invoice invoice) {
+        // only printing logic
+    }
+}
+
+2. O - Open/Closed Principle (OCP):
+Software entities (classes, modules, functions) should be open for extension but closed for modification.
+This means you should be able to add new functionality to a class without changing its existing code.
+
+Bad Example (Violates OCP):
+public class NotificationService {
+    public void sendNotification(String type) {
+        if (type.equals("EMAIL")) {
+            System.out.println("Sending Email");
+        } else if (type.equals("SMS")) {
+            System.out.println("Sending SMS");
+        }
+        // Add more types here in future
+    }
+}
+
+Good Example:
+interface Notification {
+    void send();
+}
+
+class EmailNotification implements Notification {
+    public void send() {
+        System.out.println("Sending Email");
+    }
+}
+
+class SMSNotification implements Notification {
+    public void send() {
+        System.out.println("Sending SMS");
+    }
+}
+
+class NotificationService {
+    public void send(Notification notification) {
+        notification.send();
+    }
+}
+
+
+3. L – Liskov Substitution Principle (LSP)
+
+Definition: Objects of a superclass should be replaceable with objects of its subclass without 
+breaking the program.
+
+Why: Subtypes must behave consistently with their base types.
+
+Example:
+❌ A Bird base class has fly(), but Penguin subclass breaks this rule.
+✅ Instead, design hierarchies so subclasses don’t violate expectations 
+	(e.g., split into FlyingBird and NonFlyingBird).
+
+4. I – Interface Segregation Principle (ISP)
+Definition: Clients should not be forced to depend on interfaces they don’t use.
+Why: Large interfaces lead to “fat” classes that implement unused methods.
+
+Example:
+❌ A Machine interface with print(), scan(), fax() methods forces all classes to implement everything.
+✅ Instead, split into smaller interfaces like Printer, Scanner, Fax.
+
+
+5. D – Dependency Inversion Principle (DIP)
+	Definition: High-level modules should not depend on low-level modules. Both should depend on abstractions.
+	Why: Helps reduce coupling and makes code more testable.
+	Example:
+	❌ A PaymentService directly instantiates PayPalPayment.
+	✅ Instead, depend on a PaymentProcessor interface, and inject PayPalPayment or StripePayment.

@@ -24,6 +24,26 @@ public class User {
 If you save a User, all their orders will be saved.
 If you delete a User, all their orders will also be deleted.
 
+@Entity
+public class Student {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @ManyToMany
+    @JoinTable(
+        name = "student_course",
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private Set<Course> courses;
+
+    // getters and setters
+}
+
 ** JpaRepository.save() and JpaRepository.saveAndFlush() 
 
 userRepository.save(user):

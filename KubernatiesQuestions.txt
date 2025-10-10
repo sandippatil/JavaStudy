@@ -1,0 +1,449 @@
+https://www.whizlabs.com/blog/top-kubernetes-interview-questions/?gad_source=1&gad_campaignid=22355833603&gbraid=0AAAAAD_jTUmEwLLXfEUz18J6teLo4RwWe&gclid=CjwKCAjw1ozEBhAdEiwAn9qbzW479aJ4qTfG2CGlyTyWcUoyJslAZke8N2preqZMdxfce2HIqGgkyxoCfEUQAvD_BwE
+
+
+
+*** What is Kubernetes K8s?
+Kubernetes is an open-source container orchestration platform developed by Google
+It helps you automate the deployment, scaling, and management of containerized applications.
+
+***
+What Kubernetes Does:
+1. Deploys Applications
+Runs containers (usually Docker containers) on a cluster of machines.
+
+2. Scales Automatically
+Increases or decreases the number of containers based on demand.
+
+3. Self-Heals
+Restarts failed containers, replaces and reschedules them when nodes die.
+
+4. Load Balances Traffic
+Distributes incoming traffic across multiple containers.
+
+5. Manages Configuration & Secrets
+Keeps sensitive info and config settings separate and secure.
+
+***
+Key Concepts:
+| Term                   | Description                                                         |
+| ---------------------- | ------------------------------------------------------------------- |
+| **Pod**                | Smallest deployable unit. A pod can contain one or more containers. |
+| **Node**               | A physical or VM machine where Kubernetes runs containers.          |
+| **Cluster**            | A set of nodes managed by Kubernetes.                               |
+| **Deployment**         | Defines how to create and manage pods. Supports rolling updates.    |
+| **Service**            | Exposes your pods to internal or external traffic.                  |
+| **ConfigMap / Secret** | Stores non-sensitive (ConfigMap) or sensitive (Secret) config data. |
+
+***
+Why Use Kubernetes?
+Portability: Runs anywhere (local, cloud, hybrid)
+Scalability: Easily handles traffic spikes
+Efficiency: Optimizes hardware usage
+Resilience: Automatic failover and recovery
+
+***Port, nodePort, TargetPort
+
+External Client
+     ↓
+NodeIP:nodePort   (e.g., 192.168.1.10:30080)
+     ↓
+Service port      (e.g., 80)
+     ↓
+Pod's targetPort  (e.g., 80 in the container)
+
+| Field            | Meaning                                                                                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`targetPort`** | Port **inside the Pod’s container** (where the app actually runs). Example: Nginx runs on 80.                                                                              |
+| **`port`**       | Port **exposed by the Kubernetes Service** (internal cluster access).                                                                                                      |
+| **`nodePort`**   | Optional (only for `NodePort` service). Port **on the node's IP** that allows external access from outside the cluster. Must be between **30000–32767** unless customized. |
+
+# service-nodeport.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  type: NodePort
+  selector:
+    app: myapp
+  ports:
+  - port: 80         # service port
+    targetPort: 80   # pod container port
+    nodePort: 30080  # external access via this port on any node
+
+
+*** Why Control POD Resources?
+Prevents a single Pod from consuming all CPU or memory.
+Ensures fair resource sharing across multiple Pods.
+Helps the scheduler place Pods appropriately.
+Avoids OOM (Out Of Memory) errors or CPU starvation.
+
+
+*** How can we control the resource usage of POD
+Two Key Fields:
+| Field          | Meaning                                                                                                        |
+| -------------- | -------------------------------------------------------------------------------------------------------------- |
+| **`requests`** | Minimum guaranteed resources for the container. The scheduler uses this to decide where to place the Pod.      |
+| **`limits`**   | Maximum resources the container can use. If it tries to go beyond, it gets throttled (CPU) or killed (memory). |
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: limited-pod
+spec:
+  containers:
+  - name: app
+    image: nginx
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "250m"       # 250 milliCPU = 0.25 CPU core
+      limits:
+        memory: "256Mi"
+        cpu: "500m"       # 0.5 CPU core
+
+Memory values use Mi (mebibytes), Gi (gibibytes), etc.
+CPU is measured in cores or millicores (500m = half a core).
+You can set this at the container level, and if a Pod has multiple containers, each can have its own limits.
+
+***How do you perform maintenance activities on the Kubernetes node:
+1. cordon node:
+	In Kubernetes, when you cordon a node, you're telling Kubernetes:
+	❌ "Don’t put any new pods on this node, but leave the existing pods running."
+
+kubectl cordon node2
+
+kubectl run myapp2 --image=nginx
+
+Kubernetes will not schedule it on node2 — only on node1 or node3.
+
+2. Drain the Node:
+	"Drain" means: move everything out before doing work.
+	In Kubernetes, when you drain a node, you are saying:
+	🚫 "Move all running pods off this node so I can safely shut it down or do maintenance."
+	
+	kubectl drain node2 --ignore-daemonsets --delete-emptydir-data
+
+	All normal Pods are moved to other nodes.
+	DaemonSet Pods are ignored (they’re system pods).
+	Pods using emptyDir volumes are deleted (they can't move).
+
+3. Perform Maintenance
+Now that the node is empty:
+	Apply OS patches.
+	Upgrade Docker/container runtime.
+	Update Kubernetes components (like kubelet).
+
+4. Uncordon the Node:
+	Once maintenance is complete, make the node available again for scheduling Pods:
+
+	kubectl uncordon node2
+
+5. Verify Node Status
+	Check that the node is Ready again:
+	kubectl get nodes
+
+
+*** What is the Pod Disruption Budget (PDB)?
+A Pod Disruption Budget (PDB) is a safety rule you set to make sure too many Pods don’t go down at 
+the same time during voluntary disruptions.
+
+“Don’t remove more than X pods of this app at once — even during maintenance, upgrades, or scaling!”
+
+
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: webapp-pdb
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: webapp
+
+
+At least 3 pods must always be running.
+So Kubernetes can only evict 2 pods at a time max.
+
+kubectl drain node1 --ignore-daemonsets --delete-emptydir-data
+
+Kubernetes checks the PDB
+If draining would violate the PDB, it blocks the drain
+You must wait or scale your deployment up temporarily
+
+
+*** How do you monitor the Kubernetes cluster? 
+
+✅ Key Areas to Monitor:
+| Area        | What to Watch                       |
+| ----------- | ----------------------------------- |
+| **Pods**    | Restarts, crashes, resource usage   |
+| **Nodes**   | CPU, memory, disk, network          |
+| **Cluster** | API server health, scheduler, etcd  |
+| **Apps**    | Logs, latency, errors, availability |
+| **Events**  | Failures, evictions, scaling events |
+
+
+1. Prometheus + Grafana (Most Popular)
+	Prometheus scrapes metrics from nodes, pods, and services.
+	Grafana visualizes those metrics in dashboards.
+
+	helm install monitoring prometheus-community/kube-prometheus-stack
+	
+2. Metrics Server (Lightweight)
+	Collects CPU & memory usage from nodes and pods.
+	Used for kubectl top and Horizontal Pod Autoscaler.
+	
+	kubectl top nodes
+	kubectl top pods
+	
+	install:
+	kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+3. Kubernetes Dashboard:
+	Web UI to monitor and manage cluster resources.
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+4. Cloud Provider Monitoring (if applicable)
+	Platform	Tools
+	AWS	        CloudWatch Container Insights
+	
+
+*** What is the use of Kube-scheduler?
+The Kube-scheduler is a core component of the Kubernetes control plane.
+Its job is to decide which node should run each newly created Pod.
+
+What the Kube-scheduler does:
+	Watches for Pods that don’t have a node assigned.
+	Finds the best node based on:
+		Resource availability (CPU, memory)
+		Pod requirements (node labels, taints/tolerations)
+		Affinity rules (e.g., "stay close to Pod A")
+		Policies like spreading Pods across zones
+		Assigns the Pod to the node
+
+
+*** What are DaemonSets in Kubernetes?
+A DaemonSet ensures that a copy of a Pod runs on every node (or a set of specific nodes) 
+in the Kubernetes cluster.
+
+Think of DaemonSets as a "run-on-all-nodes" rule.
+
+Whenever:
+	A new node is added to the cluster, the DaemonSet automatically starts the pod on it.
+	A node is removed, the pod is also removed.
+
+*** Why use a DaemonSet?
+DaemonSets are used to run infrastructure-level services on each node, such as:
+
+| Use Case       | Example Pods             |
+| -------------- | ------------------------ |
+| Logging        | Fluentd, Logstash        |
+| Monitoring     | Prometheus Node Exporter |
+| Security       | Antivirus, filebeat      |
+| Networking     | CNI plugins, kube-proxy  |
+| Storage Agents | Disk monitoring tools    |
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-agent
+spec:
+  selector:
+    matchLabels:
+      name: log-agent
+  template:
+    metadata:
+      labels:
+        name: log-agent
+    spec:
+      containers:
+      - name: log-agent
+        image: fluentd
+
+*** What is helm?
+Helm is a package manager for Kubernetes. It helps you define, install, and manage Kubernetes applications
+more easily by using pre-configured templates called charts.
+
+*** What is a cluster IP in Kubernetes?
+A ClusterIP is the default type of Kubernetes Service.
+It gives your Service a stable internal IP address that is only accessible inside the cluster.
+
+What it Does:
+Creates a virtual IP (ClusterIP) inside the cluster.
+Other Pods and Services in the cluster can access your app using that IP or Service name.
+It doesn’t expose your app to the internet or external users.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  selector:
+    app: myapp
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
+
+What this means:
+	Traffic inside the cluster goes to myservice:80
+	It routes to Pod containers running on port 8080
+	The Service gets an internal Cluster IP, like 10.96.183.45
+
+View Cluster IPs:
+kubectl get svc
+
+NAME        TYPE        CLUSTER-IP     PORT(S)
+myservice   ClusterIP   10.96.183.45   80/TCP
+
+
+*** What are the various services available in Kubernetes?
+In Kubernetes, a Service is a stable networking abstraction that exposes a set of Pods and lets 
+other components talk to them reliably, even if Pods are replaced or restarted.
+
+Kubernetes offers 4 main types of Services, each serving a different purpose.
+1. ClusterIP (Default)
+	Access: Only within the cluster.
+	Use case: Internal communication between microservices.
+	type: ClusterIP
+	Example: A frontend Pod accessing a backend API inside the cluster.
+
+2. NodePort:
+	Access: Outside the cluster via NodeIP:NodePort.
+	Use case: Quick way to expose a service on each node’s IP and a static port (30000–32767).
+	Example: http://<NodeIP>:30080	
+	type: NodePort
+	
+3. LoadBalancer:
+	Access: External access via a cloud load balancer.
+	Use case: Production-level access from the internet (supported on cloud providers like AWS, GCP, Azure).
+	Example: Public IP + load balancer → forwards to your service.
+	type: LoadBalancer
+
+4. ExternalName:
+	Access: Maps a Kubernetes service to an external DNS name.
+	Use case: Let a Pod access a service outside the cluster using a local alias.
+	type: ExternalName
+	externalName: api.external.com
+	Then access via: http://myservice.default.svc.cluster.local
+	
+*** What is Blue-Green Deployment?
+Blue-Green Deployment is a technique where:
+	You run two environments: Blue (current/old) and Green (new).
+	You deploy the new version (Green) alongside the current version (Blue).
+	Once the Green version is healthy, you switch traffic to it.
+	Then you delete the Blue version after verification.
+
+Why Use It?
+	Zero downtime
+	Safe rollback (just switch traffic back to Blue)
+	Test new version live in production before exposing to users
+	
+Part 1: Manual Blue-Green Deployment Using Pure Kubernetes
+	1. Deploy the Blue Version (Initial Deployment)
+		# deployment-blue.yaml
+		apiVersion: apps/v1
+		kind: Deployment
+		metadata:
+		  name: myapp-blue
+		spec:
+		  replicas: 2
+		  selector:
+			matchLabels:
+			  app: myapp
+			  version: blue
+		  template:
+			metadata:
+			  labels:
+				app: myapp
+				version: blue
+			spec:
+			  containers:
+			  - name: myapp
+				image: myregistry/myapp:1.0
+				ports:
+				- containerPort: 80
+
+			# service.yaml
+			apiVersion: v1
+			kind: Service
+			metadata:
+			  name: myapp-service
+			spec:
+			  selector:
+				app: myapp
+				version: blue   # 👈 points to blue version
+			  ports:
+			  - port: 80
+				targetPort: 80
+
+kubectl apply -f deployment-blue.yaml
+kubectl apply -f service.yaml
+
+2. Deploy the Green Version (New Version)
+	# deployment-green.yaml
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	  name: myapp-green
+	spec:
+	  replicas: 2
+	  selector:
+		matchLabels:
+		  app: myapp
+		  version: green
+	  template:
+		metadata:
+		  labels:
+			app: myapp
+			version: green
+		spec:
+		  containers:
+		  - name: myapp
+			image: myregistry/myapp:2.0  # 👈 New version
+			ports:
+			- containerPort: 80
+	kubectl apply -f deployment-green.yaml
+
+✅ 3. Switch Traffic to Green
+	# service.yaml (modified)
+	spec:
+	  selector:
+		app: myapp
+		version: green   # 👈 switch to green
+
+	kubectl apply -f service.yaml
+
+✅ 4. Delete the Old Blue Deployment (optional)
+	kubectl delete deployment myapp-blue	
+
+
+*** Importent commands
+kubectl get pods
+kubectl get pods –all-namespaces
+kubectl get pod monkey -o wide
+kubectl get pod monkey -o yaml
+kubectl describe pod monkey
+kubectl scale deployment/POD_NAME –replicas=N
+kubectl rollout history deployment/DEPLOYMENT_NAME
+kubectl rollout undo deployment/DEPLOYMENT_NAME –to-revision=N
+kubectl get services
+kubectl expose deployment/dep_name –port=2001 –type=NodePort
+kubectl get pv
+kubectl get pvc
+kubectl get secrets
+kubectl create secret generic –help
+kubectl create secret generic mysql –from-literal=password=root
+kubectl get secrets mysql -o yaml
+kubectl create configmap foobar –from-file=config.js
+kubectl get configmap foobar -o yaml
+kubectl get pods –all-namespaces |grep dns
+kubectl get ingress
+kubectl expose deployment ghost –port=2368
+kubectl get daemonsets
+kubectl describe
+kubectl logs
+kubectl exec
+kubectl get nodes –show-labels
+kubectl get events
